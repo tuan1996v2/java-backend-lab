@@ -1,0 +1,38 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: java-backend-lab
+
+  # Cấu hình Database H2 (chạy trực tiếp trong RAM, không cần cài đặt DB bên ngoài)
+  datasource:
+    url: jdbc:h2:mem:storedb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+
+  # Bật giao diện H2 Console tại: http://localhost:8080/h2-console
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+  # Cấu hình Hibernate / JPA (tự động tạo bảng từ Entity, in câu lệnh SQL ra log)
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+# Cấu hình Swagger / OpenAPI: http://localhost:8080/swagger-ui.html
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+
