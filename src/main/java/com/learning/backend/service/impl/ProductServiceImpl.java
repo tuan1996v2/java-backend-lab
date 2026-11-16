@@ -6,6 +6,7 @@ import com.learning.backend.entity.Product;
 import com.learning.backend.exception.ResourceNotFoundException;
 import com.learning.backend.repository.ProductRepository;
 import com.learning.backend.service.ProductService;
+import com.learning.backend.util.TextNormalizer;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,11 +36,16 @@ public class ProductServiceImpl implements ProductService {
         boolean hasCategory = category != null && !category.trim().isEmpty();
 
         if (hasKeyword && hasCategory) {
-            products = productRepository.findByNameContainingIgnoreCaseAndCategoryIgnoreCase(keyword.trim(), category.trim());
+            String normalizedKeyword = TextNormalizer.normalizeForSearch(keyword);
+            String normalizedCategory = TextNormalizer.normalizeForSearch(category);
+            products = productRepository.findByNameNormalizedContainingAndCategoryNormalizedContaining(
+                    normalizedKeyword, normalizedCategory);
         } else if (hasKeyword) {
-            products = productRepository.findByNameContainingIgnoreCase(keyword.trim());
+            String normalizedKeyword = TextNormalizer.normalizeForSearch(keyword);
+            products = productRepository.findByNameNormalizedContaining(normalizedKeyword);
         } else if (hasCategory) {
-            products = productRepository.findByCategoryIgnoreCase(category.trim());
+            String normalizedCategory = TextNormalizer.normalizeForSearch(category);
+            products = productRepository.findByCategoryNormalizedContaining(normalizedCategory);
         } else {
             products = productRepository.findAll();
         }
@@ -71,8 +77,7 @@ public class ProductServiceImpl implements ProductService {
                 request.getPrice(),
                 request.getStockQuantity(),
                 request.getCategory() != null ? request.getCategory().trim() : null,
-                request.getDescription()
-        );
+                request.getDescription());
 
         Product saved = productRepository.save(product);
         return ProductResponse.fromEntity(saved);
@@ -109,4 +114,3 @@ public class ProductServiceImpl implements ProductService {
         productRepository.delete(product);
     }
 }
-

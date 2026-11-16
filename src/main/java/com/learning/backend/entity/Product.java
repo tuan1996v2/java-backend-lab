@@ -1,5 +1,6 @@
 package com.learning.backend.entity;
 
+import com.learning.backend.util.TextNormalizer;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -22,6 +23,12 @@ public class Product {
     @Column(nullable = false, length = 255)
     private String name; // Tên sản phẩm
 
+    @Column(name = "name_normalized", length = 255)
+    private String nameNormalized; // Tên đã chuẩn hóa (không dấu, chữ thường) để tìm kiếm nhanh
+
+    @Column(name = "category_normalized", length = 100)
+    private String categoryNormalized; // Tên đã chuẩn hóa (không dấu, chữ thường) để tìm kiếm nhanh
+
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal price; // Giá bán
 
@@ -43,7 +50,8 @@ public class Product {
     public Product() {
     }
 
-    public Product(String sku, String name, BigDecimal price, Integer stockQuantity, String category, String description) {
+    public Product(String sku, String name, BigDecimal price, Integer stockQuantity, String category,
+            String description) {
         this.sku = sku;
         this.name = name;
         this.price = price;
@@ -54,12 +62,16 @@ public class Product {
 
     @PrePersist
     protected void onCreate() {
+        this.nameNormalized = TextNormalizer.normalizeForSearch(this.name);
+        this.categoryNormalized = TextNormalizer.normalizeForSearch(this.category);
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }
 
     @PreUpdate
     protected void onUpdate() {
+        this.nameNormalized = TextNormalizer.normalizeForSearch(this.name);
+        this.categoryNormalized = TextNormalizer.normalizeForSearch(this.category);
         this.updatedAt = LocalDateTime.now();
     }
 
@@ -86,6 +98,22 @@ public class Product {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getNameNormalized() {
+        return nameNormalized;
+    }
+
+    public void setNameNormalized(String nameNormalized) {
+        this.nameNormalized = nameNormalized;
+    }
+
+    public String getCategoryNormalized() {
+        return categoryNormalized;
+    }
+
+    public void setCategoryNormalized(String categoryNormalized) {
+        this.categoryNormalized = categoryNormalized;
     }
 
     public BigDecimal getPrice() {
@@ -136,4 +164,3 @@ public class Product {
         this.updatedAt = updatedAt;
     }
 }
-
