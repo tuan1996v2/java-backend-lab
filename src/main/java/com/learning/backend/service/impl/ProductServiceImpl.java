@@ -7,6 +7,10 @@ import com.learning.backend.exception.ResourceNotFoundException;
 import com.learning.backend.repository.ProductRepository;
 import com.learning.backend.service.ProductService;
 import com.learning.backend.util.TextNormalizer;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,14 +22,11 @@ import java.util.stream.Collectors;
  * Sử dụng Constructor Injection (khuyến nghị thay thế @Autowired trên field).
  */
 @Service
+@Slf4j
+@RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
-
-    // Spring tự động inject ProductRepository thông qua Constructor
-    public ProductServiceImpl(ProductRepository productRepository) {
-        this.productRepository = productRepository;
-    }
 
     @Override
     @Transactional(readOnly = true)
@@ -71,15 +72,27 @@ public class ProductServiceImpl implements ProductService {
             throw new IllegalArgumentException("Mã SKU '" + request.getSku() + "' đã tồn tại!");
         }
 
-        Product product = new Product(
-                request.getSku().trim(),
-                request.getName().trim(),
-                request.getPrice(),
-                request.getStockQuantity(),
-                request.getCategory() != null ? request.getCategory().trim() : null,
-                request.getDescription());
+        // Kiểm tra discount
+        if (request.getDiscountPercent() != null) {
+            if (request.getDiscountPercent() < 0 || request.getDiscountPercent() > 100) {
+                throw new IllegalArgumentException("Phần trăm giảm giá phải từ 0 đến 100!");
+            }
+        } else {
+            request.setDiscountPercent(0);
+        }
+
+        Product product = Product.builder()
+                .sku(request.getSku().trim())
+                .name(request.getName().trim())
+                .price(request.getPrice())
+                .stockQuantity(request.getStockQuantity())
+                .category(request.getCategory() != null ? request.getCategory().trim() : null)
+                .description(request.getDescription() != null ? request.getDescription().trim() : null)
+                .discountPercent(request.getDiscountPercent())
+                .build();
 
         Product saved = productRepository.save(product);
+        log.info("Đã tạo sản phẩm mới: {}", saved);
         return ProductResponse.fromEntity(saved);
     }
 
@@ -95,12 +108,20 @@ public class ProductServiceImpl implements ProductService {
             throw new IllegalArgumentException("Mã SKU '" + request.getSku() + "' đã được sử dụng bởi sản phẩm khác!");
         }
 
+        if (request.getDiscountPercent() != null) {
+            if (request.getDiscountPercent() < 0 || request.getDiscountPercent() > 100) {
+                throw new IllegalArgumentException("Phần trăm giảm giá phải từ 0 đến 100!");
+            }
+        } else {
+            request.setDiscountPercent(0);
+        }
         product.setSku(request.getSku().trim());
         product.setName(request.getName().trim());
         product.setPrice(request.getPrice());
         product.setStockQuantity(request.getStockQuantity());
         product.setCategory(request.getCategory() != null ? request.getCategory().trim() : null);
         product.setDescription(request.getDescription());
+        product.setDiscountPercent(request.getDiscountPercent());
 
         Product updated = productRepository.save(product);
         return ProductResponse.fromEntity(updated);

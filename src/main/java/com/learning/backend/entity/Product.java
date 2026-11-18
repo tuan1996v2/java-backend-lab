@@ -2,6 +2,14 @@ package com.learning.backend.entity;
 
 import com.learning.backend.util.TextNormalizer;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -10,11 +18,18 @@ import java.time.LocalDateTime;
  * Trong JPA/Hibernate: Mỗi object Product đại diện cho 1 dòng (row) trong bảng.
  */
 @Entity
+@Builder
+@Setter
+@AllArgsConstructor
 @Table(name = "products")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
+@ToString(of = { "id", "sku", "name" })
 public class Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Setter(AccessLevel.NONE)
     private Long id;
 
     @Column(nullable = false, unique = true, length = 50)
@@ -42,23 +57,16 @@ public class Product {
     private String description;
 
     @Column(name = "created_at", updatable = false)
+    @Setter(AccessLevel.NONE)
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at")
+    @Setter(AccessLevel.NONE)
     private LocalDateTime updatedAt;
 
-    public Product() {
-    }
-
-    public Product(String sku, String name, BigDecimal price, Integer stockQuantity, String category,
-            String description) {
-        this.sku = sku;
-        this.name = name;
-        this.price = price;
-        this.stockQuantity = stockQuantity;
-        this.category = category;
-        this.description = description;
-    }
+    @Column(name = "discount_percent", nullable = false)
+    @Builder.Default
+    private Integer discountPercent = 0;
 
     @PrePersist
     protected void onCreate() {
@@ -75,92 +83,4 @@ public class Product {
         this.updatedAt = LocalDateTime.now();
     }
 
-    // Getters and Setters
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getSku() {
-        return sku;
-    }
-
-    public void setSku(String sku) {
-        this.sku = sku;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getNameNormalized() {
-        return nameNormalized;
-    }
-
-    public void setNameNormalized(String nameNormalized) {
-        this.nameNormalized = nameNormalized;
-    }
-
-    public String getCategoryNormalized() {
-        return categoryNormalized;
-    }
-
-    public void setCategoryNormalized(String categoryNormalized) {
-        this.categoryNormalized = categoryNormalized;
-    }
-
-    public BigDecimal getPrice() {
-        return price;
-    }
-
-    public void setPrice(BigDecimal price) {
-        this.price = price;
-    }
-
-    public Integer getStockQuantity() {
-        return stockQuantity;
-    }
-
-    public void setStockQuantity(Integer stockQuantity) {
-        this.stockQuantity = stockQuantity;
-    }
-
-    public String getCategory() {
-        return category;
-    }
-
-    public void setCategory(String category) {
-        this.category = category;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
 }

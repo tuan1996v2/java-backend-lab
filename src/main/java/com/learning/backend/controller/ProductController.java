@@ -7,6 +7,8 @@ import com.learning.backend.service.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,26 +17,23 @@ import java.util.List;
 
 /**
  * Controller: Điểm tiếp nhận các HTTP Request từ Client (Web/Mobile/Postman).
- * - @RestController = @Controller + @ResponseBody (tự động chuyển data Java sang JSON).
+ * - @RestController = @Controller + @ResponseBody (tự động chuyển data Java
+ * sang JSON).
  * - @RequestMapping("/api/v1/products"): Định nghĩa prefix endpoint.
  */
 @RestController
 @RequestMapping("/api/v1/products")
+@RequiredArgsConstructor
 @Tag(name = "Product API", description = "Các endpoint quản lý sản phẩm (CRUD, tìm kiếm, lọc)")
 public class ProductController {
 
     private final ProductService productService;
 
-    public ProductController(ProductService productService) {
-        this.productService = productService;
-    }
-
     @GetMapping
     @Operation(summary = "Lấy danh sách sản phẩm (có hỗ trợ tìm kiếm theo tên và lọc theo danh mục)")
     public ResponseEntity<ApiResponse<List<ProductResponse>>> getAllProducts(
             @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) String category
-    ) {
+            @RequestParam(required = false) String category) {
         List<ProductResponse> products = productService.getAllProducts(keyword, category);
         return ResponseEntity.ok(ApiResponse.ok("Lấy danh sách thành công", products));
     }
@@ -57,8 +56,7 @@ public class ProductController {
     @Operation(summary = "Cập nhật thông tin sản phẩm theo ID")
     public ResponseEntity<ApiResponse<ProductResponse>> updateProduct(
             @PathVariable Long id,
-            @Valid @RequestBody ProductRequest request
-    ) {
+            @Valid @RequestBody ProductRequest request) {
         ProductResponse updated = productService.updateProduct(id, request);
         return ResponseEntity.ok(ApiResponse.ok("Cập nhật sản phẩm thành công", updated));
     }
@@ -70,4 +68,3 @@ public class ProductController {
         return ResponseEntity.ok(ApiResponse.ok("Đã xóa sản phẩm thành công", null));
     }
 }
-

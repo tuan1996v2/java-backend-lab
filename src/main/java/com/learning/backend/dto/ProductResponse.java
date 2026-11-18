@@ -1,113 +1,72 @@
 package com.learning.backend.dto;
 
 import com.learning.backend.entity.Product;
+
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import lombok.extern.jackson.Jacksonized;
+
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 
 /**
  * DTO trả dữ liệu về cho Client.
- * Giúp ẩn các thông tin nhạy cảm của Entity (nếu có) hoặc format dữ liệu phù hợp trước khi xuất ra JSON.
+ * Giúp ẩn các thông tin nhạy cảm của Entity (nếu có) hoặc format dữ liệu phù
+ * hợp trước khi xuất ra JSON.
  */
+
+@Data
+@Builder
+@Jacksonized
+@NoArgsConstructor
+@AllArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
+
 public class ProductResponse {
 
-    private Long id;
-    private String sku;
-    private String name;
-    private BigDecimal price;
-    private Integer stockQuantity;
-    private String category;
-    private String description;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-
-    public ProductResponse() {
-    }
+    Long id;
+    String sku;
+    String name;
+    BigDecimal price;
+    Integer stockQuantity;
+    String category;
+    String description;
+    LocalDateTime createdAt;
+    LocalDateTime updatedAt;
+    Integer discountPercent;
+    BigDecimal finalPrice;
 
     public static ProductResponse fromEntity(Product entity) {
-        ProductResponse res = new ProductResponse();
-        res.setId(entity.getId());
-        res.setSku(entity.getSku());
-        res.setName(entity.getName());
-        res.setPrice(entity.getPrice());
-        res.setStockQuantity(entity.getStockQuantity());
-        res.setCategory(entity.getCategory());
-        res.setDescription(entity.getDescription());
-        res.setCreatedAt(entity.getCreatedAt());
-        res.setUpdatedAt(entity.getUpdatedAt());
-        return res;
+        if (entity == null) {
+            return null;
+        }
+        return ProductResponse.builder()
+                .id(entity.getId())
+                .sku(entity.getSku())
+                .name(entity.getName())
+                .price(entity.getPrice())
+                .stockQuantity(entity.getStockQuantity())
+                .category(entity.getCategory())
+                .description(entity.getDescription())
+                .createdAt(entity.getCreatedAt())
+                .updatedAt(entity.getUpdatedAt())
+                .discountPercent(entity.getDiscountPercent())
+                .finalPrice(calculateFinalPrice(entity.getPrice(), entity.getDiscountPercent()))
+                .build();
     }
 
-    // Getters and Setters
-    public Long getId() {
-        return id;
+    private static BigDecimal calculateFinalPrice(BigDecimal price, Integer discountPercent) {
+        if (price == null) {
+            return null;
+        }
+        int discount = discountPercent != null ? discountPercent : 0;
+        return price.multiply(BigDecimal.valueOf(100 - discount))
+                .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getSku() {
-        return sku;
-    }
-
-    public void setSku(String sku) {
-        this.sku = sku;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public BigDecimal getPrice() {
-        return price;
-    }
-
-    public void setPrice(BigDecimal price) {
-        this.price = price;
-    }
-
-    public Integer getStockQuantity() {
-        return stockQuantity;
-    }
-
-    public void setStockQuantity(Integer stockQuantity) {
-        this.stockQuantity = stockQuantity;
-    }
-
-    public String getCategory() {
-        return category;
-    }
-
-    public void setCategory(String category) {
-        this.category = category;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
 }
-

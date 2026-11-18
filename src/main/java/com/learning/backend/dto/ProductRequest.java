@@ -1,15 +1,19 @@
 package com.learning.backend.dto;
 
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.math.BigDecimal;
 
-/**
- * DTO (Data Transfer Object) nhận payload từ Client gửi lên trong body của Request (POST / PUT).
- * Sử dụng Bean Validation để tự động kiểm tra tính hợp lệ của dữ liệu đầu vào.
- */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class ProductRequest {
 
     @NotBlank(message = "Mã SKU không được để trống")
@@ -29,65 +33,8 @@ public class ProductRequest {
     private String category;
     private String description;
 
-    public ProductRequest() {
-    }
+    @Min(value = 0, message = "Phần trăm giảm giá phải lớn hơn hoặc bằng 0")
+    @Max(value = 100, message = "Phần trăm giảm giá phải nhỏ hơn hoặc bằng 100")
+    private Integer discountPercent;
 
-    public ProductRequest(String sku, String name, BigDecimal price, Integer stockQuantity, String category, String description) {
-        this.sku = sku;
-        this.name = name;
-        this.price = price;
-        this.stockQuantity = stockQuantity;
-        this.category = category;
-        this.description = description;
-    }
-
-    // Getters and Setters
-    public String getSku() {
-        return sku;
-    }
-
-    public void setSku(String sku) {
-        this.sku = sku;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public BigDecimal getPrice() {
-        return price;
-    }
-
-    public void setPrice(BigDecimal price) {
-        this.price = price;
-    }
-
-    public Integer getStockQuantity() {
-        return stockQuantity;
-    }
-
-    public void setStockQuantity(Integer stockQuantity) {
-        this.stockQuantity = stockQuantity;
-    }
-
-    public String getCategory() {
-        return category;
-    }
-
-    public void setCategory(String category) {
-        this.category = category;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
 }
-

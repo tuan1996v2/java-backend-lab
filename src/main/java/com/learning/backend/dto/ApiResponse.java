@@ -2,16 +2,21 @@ package com.learning.backend.dto;
 
 import java.time.LocalDateTime;
 
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * Chuẩn hóa cấu trúc JSON trả về cho mọi API của ứng dụng (chuẩn công nghiệp).
  * Giúp Client (Flutter, React...) luôn nhận được format đồng nhất:
  * {
- *   "success": true,
- *   "message": "...",
- *   "data": { ... },
- *   "timestamp": "2026-11-11T15:30:00"
+ * "success": true,
+ * "message": "...",
+ * "data": { ... },
+ * "timestamp": "2026-11-11T15:30:00"
  * }
  */
+@Setter
+@Getter
 public class ApiResponse<T> {
 
     private boolean success;
@@ -42,37 +47,4 @@ public class ApiResponse<T> {
         return new ApiResponse<>(false, message, null);
     }
 
-    // Getters and Setters
-    public boolean isSuccess() {
-        return success;
-    }
-
-    public void setSuccess(boolean success) {
-        this.success = success;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public T getData() {
-        return data;
-    }
-
-    public void setData(T data) {
-        this.data = data;
-    }
-
-    public LocalDateTime getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(LocalDateTime timestamp) {
-        this.timestamp = timestamp;
-    }
 }
-
