@@ -14,6 +14,7 @@
 - Người học không muốn mất thời gian tự viết JUnit testcase cho các bài Spring Boot CRUD nhỏ — dùng `main()` self-check (`✅ PASS / ❌ FAIL`) cho Core Java và test tay Swagger/H2 Console cho Spring Boot.
 
 ## Git & InfoSec Rules (CRITICAL)
-- **KHÔNG BAO GIỜ tự ý chạy `git push`** hoặc xóa `.git/hooks/pre-push` trên máy công ty — chính sách an toàn thông tin công ty cấm push source lên GitHub cá nhân.
-- Chỉ dùng **commit local** (hoặc `git bundle` khi người dùng yêu cầu đóng gói mang về máy nhà).
+- **KHÔNG BAO GIỜ xóa, sửa hoặc vượt qua `.git/hooks/pre-push`** (tuyệt đối không dùng `--no-verify`). Hook đã được cấu hình chỉ cho phép `git push` khi dùng Wi-Fi và không có cổng mạng dây LAN nào đang active.
+- Chỉ chạy `git push` khi người dùng yêu cầu rõ (ví dụ lệnh **`update git`**), và luôn để hook kiểm tra mạng tự nhiên.
+- Khi người dùng nói **`update git`**: tự động thực hiện quy trình cuối buổi trong `.agents/skills/java-mentor/SKILL.md` (cập nhật `LEARNING_PROGRESS.md`, soạn sẵn file bài học tiếp theo, verify compile, commit và `git push`).
 - Khi chạy Maven trên máy có mạng hạn chế: ưu tiên thêm cờ `-o` (offline) như `./mvnw -o compile` để build trong ~1–3 giây.

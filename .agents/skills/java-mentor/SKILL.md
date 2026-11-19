@@ -36,10 +36,16 @@ When asked to review a module or task:
    - Unused imports, dead comments, missing `.trim()`.
 4. Only unlock the next module after confirming the learner understands the catches.
 
-## Session Wrap-Up / Cross-Machine Sync
-When the learner finishes a session and wants to sync to another machine:
-1. Update `LEARNING_PROGRESS.md` with:
-   - Newly completed modules/tasks and key takeaways/mistakes caught.
-   - Exact next step to resume from.
-2. Commit changes **locally** (`git add -A && git commit ...`) — NEVER push if `.git/hooks/pre-push` or InfoSec rules forbid it.
-3. Remind the user to generate/update a `git bundle` file (`git bundle create ../java-backend-lab.bundle --all`) if transferring via offline/allowed personal storage.
+## Session Wrap-Up / `update git` Command Workflow
+When the learner says **"update git"** (or asks to wrap up / sync the session):
+1. **Update `LEARNING_PROGRESS.md`**:
+   - Summarize all new concepts, code review catches, and pitfalls learned in this session.
+   - Mark completed modules/tasks and record the exact next step to resume from.
+2. **Prepare Tomorrow's Lesson**:
+   - If the current module is finished (or nearly done), generate the next `ModuleXPractice.java` (with RN/TS cheat sheet, inline hints, and `main()` self-checks) so the next session on any machine starts immediately with coding.
+3. **Verify Build**:
+   - Run `./mvnw -o compile -q` (and run any updated practice class) to ensure zero compilation errors before committing.
+4. **Commit & Guarded Push**:
+   - Commit all changes (`git add -A && git commit -m "..."`).
+   - Run `git push` **strictly through `.git/hooks/pre-push`** (NEVER use `--no-verify` or bypass/remove the hook).
+   - If the hook blocks the push because LAN (`en0`) is active or route is not Wi-Fi, stop and report the exact block message so the user can disconnect LAN before retrying.
