@@ -35,6 +35,9 @@ import java.util.Map;
  * - Cẩn thận với BigDecimal làm key của HashMap:
  *   new BigDecimal("38000") và new BigDecimal("38000.00") khác nhau với HashMap (vì khác số lẻ)!
  *   Muốn gộp chung giá trị, phải chuẩn hóa key bằng price.stripTrailingZeros() trước khi put/get!
+ *
+ * NHIỆM VỤ:
+ * Hoàn thành 12 bài bên dưới (các bài gắn 🪨 có gài bẫy thực tế) cho đến khi toàn bộ in ✅ PASS!
  */
 public class Module3Practice {
 
@@ -219,7 +222,7 @@ public class Module3Practice {
      *   + Bước 1: Gặp SP1 -> "Sữa tươi" = 0 + 10 = 10
      *   + Bước 2: Gặp SP2 -> "Sữa chua" = 0 + 0 = 0
      *   + Bước 3: Gặp SP4 -> "Sữa tươi" = 10 + 2 = 12
-     *   + Đầu ra: { "Sữa tươi": 12, "Sữa chua": 0 } (chú ý: nếu item.stock < 0 thì bỏ qua hoặc coi như 0).
+     *   + Đầu ra: { "Sữa tươi": 12, "Sữa chua": 0 } (nếu item.stock < 0 thì coi như 0).
      */
     public static Map<String, Integer> bai4_tinhTongTonKhoTheoDanhMuc(List<ProductItem> items) {
         // TODO: Viết code của bạn ở đây
@@ -341,11 +344,12 @@ public class Module3Practice {
      * BÀI 12 (Bảng cấu hình `Map.of` thay cho `switch-case` dài dòng): Tính phí ship theo mã tỉnh.
      * - Ngữ cảnh: Thay vì viết chuỗi `if/else` hoặc `switch` dài hàng chục tỉnh thành, backend lưu
      *   bảng phí ship dạng `Map<String, BigDecimal>` để tra cứu trong 1 dòng.
-     * - Quy tắc:
-     *   + Nếu `orderTotal != null && orderTotal >= 500_000` -> trả về `BigDecimal.ZERO` (Freeship).
-     *   + Ngược lại, tra bảng hằng số `Map.of("HN", new BigDecimal("20000"), "HCM", new BigDecimal("25000"), "DN", new BigDecimal("25000"))`
-     *     (chuẩn hóa `provinceCode` trim + IN HOA trước khi tra); nếu tỉnh khác hoặc `null` -> trả về `35000`.
-     * - Ví dụ: (200000, "hn") -> 20000; (200000, "CAN_THO") -> 35000; (500000, "HN") -> 0.
+     * - Ví dụ luồng dữ liệu:
+     *   + Bảng cấu hình: `Map.of("HN", new BigDecimal("20000"), "HCM", new BigDecimal("25000"), "DN", new BigDecimal("25000"))`
+     *   + Đầu vào: (orderTotal = 200000, provinceCode = "  hn ") -> Đầu ra: 20000
+     *   + Đầu vào: (orderTotal = 200000, provinceCode = "CAN_THO") -> không có trong bảng -> Đầu ra: 35000
+     *   + Đầu vào: (orderTotal = 500000, provinceCode = "HN") -> >= 500_000 -> Đầu ra: 0 (Freeship)
+     * - Công cụ: `shippingMap.getOrDefault(normalizedProvince, new BigDecimal("35000"))`
      */
     public static BigDecimal bai12_tinhPhiShipBangMap(BigDecimal orderTotal, String provinceCode) {
         // TODO: Viết code của bạn ở đây

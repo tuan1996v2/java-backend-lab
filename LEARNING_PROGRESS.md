@@ -37,12 +37,13 @@
 - **MapStruct (`ProductMapper.java`):** Đã cài sẵn dependency (`mapstruct`, `mapstruct-processor`, `lombok-mapstruct-binding`) vào `pom.xml`, nhưng **tạm giữ `ProductMapper.java` làm khung trống** để học chắc Core Java trước rồi quay lại sau.
 
 ### B. Core Java Thực Chiến (`com.learning.javacore`)
-- **Module 1 ([Module1Practice.java](src/main/java/com/learning/javacore/module1/Module1Practice.java)) — ✅ ĐÃ HOÀN THÀNH (21/21 PASS):**
-  - Đã nắm: `.trim()`, `.toUpperCase()`, `.equalsIgnoreCase()`, `substring(start, end)`, `matches(...)`, `BigDecimal.compareTo(...)`.
-  - **2 bẫy quan trọng cần luôn nhớ từ review Module 1:**
-    1. `BigDecimal.divide(divisor, 2, RoundingMode.HALF_UP)` — **phải truyền đủ 3 tham số** (`RoundingMode`), tránh gọi hàm 2 tham số cũ `divide(divisor, 2)` vì `2` ở đó bị hiểu là `ROUND_CEILING` ở 0 chữ số lẻ!
-    2. **Yoda condition tránh `NullPointerException`:** viết `"HN".equalsIgnoreCase(provinceCode)` thay vì `provinceCode.equalsIgnoreCase("HN")`.
-- **Module 2 ([Module2Practice.java](src/main/java/com/learning/javacore/module2/Module2Practice.java)) — ✅ ĐÃ HOÀN THÀNH (12 bài / 19/19 PASS):**
+- **Module 1 ([Module1Practice.java](src/main/java/com/learning/javacore/module1/Module1Practice.java)) — ✅ ĐÃ HOÀN THÀNH (12 bài / 32/32 PASS — chuẩn Senior):**
+  - Đã nắm: `.trim()`, `.toUpperCase()`, `.equalsIgnoreCase()`, `substring(start, end)`, `indexOf`, `matches(...)`, `BigDecimal.compareTo(...)`, `switch` expression, helper `normalizeText(...)`.
+  - **3 bẫy quan trọng cần luôn nhớ từ Module 1:**
+    1. `BigDecimal.divide(divisor, 2, RoundingMode.HALF_UP)` — **phải truyền đủ 3 tham số** (`RoundingMode`), nhân trước chia sau để giữ chính xác.
+    2. **Yoda condition & thứ tự guard:** `"HN".equalsIgnoreCase(provinceCode)`, tạo `safeDiscount` / chuẩn hóa trước khi đem so sánh, kiểm tra `indexOf == -1` trước khi cộng trừ chỉ số `substring`.
+    3. **`switch(null)` nổ NPE:** luôn chuẩn hóa `null -> ""` trước khi vào `switch`.
+- **Module 2 ([Module2Practice.java](src/main/java/com/learning/javacore/module2/Module2Practice.java)) — ✅ ĐÃ HOÀN THÀNH (12 bài / 21/21 PASS — chuẩn Senior):**
   - Đã nắm: `List` (`ArrayList`), `Set` (`HashSet` vs `LinkedHashSet` vs `TreeSet`), vòng lặp `for-each`, xóa phần tử an toàn với `removeIf` / `Iterator`, `subList` + `Math.min`, `break;` dừng sớm, tách helper `normalizeText(...)`.
   - **🩹 Vết sẹo đã học ở Module 2:**
     1. **Điểm mù dấu `!` với `isEmpty()`:** Quen JS `if (arr.length)` nên viết nhầm `if (list.isEmpty())` thay vì `!list.isEmpty()`. Với vòng `for`, chỉ cần `if (list != null)` là đủ!
@@ -69,8 +70,8 @@
 
 | Module | Nội dung | File thực hành | Trạng thái |
 | :---: | :--- | :--- | :---: |
-| **1** | `String`, `.equals()`, `BigDecimal`, `if/else`, `switch` (8 bài) | `src/main/java/com/learning/javacore/module1/Module1Practice.java` | **✅ Xong (21/21 PASS)** |
-| **2** | `List` (`ArrayList`), `Set` (`HashSet`/`LinkedHashSet`), vòng lặp `for` (12 bài) | `src/main/java/com/learning/javacore/module2/Module2Practice.java` | **✅ Xong (19/19 PASS)** |
+| **1** | `String`, `.equals()`, `BigDecimal`, `if/else`, `switch` (12 bài) | `src/main/java/com/learning/javacore/module1/Module1Practice.java` | **✅ Xong (32/32 PASS)** |
+| **2** | `List` (`ArrayList`), `Set` (`HashSet`/`LinkedHashSet`), vòng lặp `for` (12 bài) | `src/main/java/com/learning/javacore/module2/Module2Practice.java` | **✅ Xong (21/21 PASS)** |
 | **3** | `Map<K, V>` (`HashMap`/`LinkedHashMap`), `getOrDefault`, đếm & gom nhóm dữ liệu (12 bài) | `src/main/java/com/learning/javacore/module3/Module3Practice.java` | **▶️ ĐANG HỌC (Next)** |
 | **4** | `Class`, `Interface`, `Enum`, tính đóng gói & đa hình (10–12 bài) | *(Chưa tạo — tạo sau khi xong Module 3)* | ⬜ Chưa học |
 | **5** | `Optional<T>`, Null Safety & `Exception` (`try-catch`, `throw`, Custom Exception) (10–12 bài) | *(Chưa tạo)* | ⬜ Chưa học |
