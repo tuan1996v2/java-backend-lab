@@ -15,28 +15,16 @@ import java.util.Map;
  * HƯỚNG DẪN CHẠY NHANH (không cần mạng):
  * java src/main/java/com/learning/javacore/module3/Module3Practice.java
  * (Hoặc sau khi có cache Maven: ./mvnw -o compile -q && java -cp target/classes com.learning.javacore.module3.Module3Practice)
- *
- * BẢNG ĐỐI CHIẾU REACT NATIVE (JS/TS) -> JAVA:
- * - const map: Record<string, number> = {}  ->  Map<String, Integer> map = new HashMap<>(); (không giữ thứ tự)
- *   hoặc new Map<string, number>()          ->  Map<String, Integer> map = new LinkedHashMap<>(); (giữ đúng thứ tự put)
- * - map[k] = v / map.set(k, v)              ->  map.put(k, v); (ghi đè nếu key đã tồn tại)
- * - map[k] / map.get(k)                     ->  map.get(k) (trả về null nếu chưa có!)
- * - map[k] ?? 0                             ->  map.getOrDefault(k, 0) (an toàn tránh NullPointerException!)
- * - k in map / map.has(k)                   ->  map.containsKey(k)
- * - for (const [k, v] of Object.entries(m)) ->  for (Map.Entry<String, Integer> e : map.entrySet()) {
- *                                                   String k = e.getKey(); Integer v = e.getValue();
- *                                               }
- * - Object.keys(m) / Object.values(m)       ->  map.keySet() / map.values()
- * - Gom nhóm vào Map<String, List<T>>:
- *   JS: groups[k] ??= []; groups[k].push(x);
- *   Java: groups.computeIfAbsent(k, key -> new ArrayList<>()).add(x);
- * - Map hằng số chỉ đọc (Java 9+):
- *   Map.of("HN", 20000, "HCM", 25000) -> KHÔNG được put thêm và CẤM key/value là null!
- * - Cẩn thận với BigDecimal làm key của HashMap:
- *   new BigDecimal("38000") và new BigDecimal("38000.00") khác nhau với HashMap (vì khác số lẻ)!
- *   Muốn gộp chung giá trị, phải chuẩn hóa key bằng price.stripTrailingZeros() trước khi put/get!
  */
 public class Module3Practice {
+
+    private static final BigDecimal FREESHIP_THRESHOLD = new BigDecimal("500000");
+    private static final BigDecimal DEFAULT_SHIP_FEE = new BigDecimal("35000");
+    private static final Map<String, BigDecimal> SHIP_FEES = Map.of(
+            "HN", new BigDecimal("20000"),
+            "HCM", new BigDecimal("25000"),
+            "DN", new BigDecimal("25000")
+    );
 
     static class ProductItem {
         String sku;
@@ -80,6 +68,10 @@ public class Module3Practice {
         check("Bài 1 - Giá SKU-03 đúng 65000",
                 priceMap != null && priceMap.get("SKU-03") != null
                         && new BigDecimal("65000").compareTo(priceMap.get("SKU-03")) == 0);
+        Map<String, BigDecimal> nullPriceMap = bai1_taoBangGiaTheoSku(Arrays.asList(
+                new ProductItem("SKU-X", "Thiếu giá", "Khác", null, 1)
+        ));
+        check("Bài 1 - Bỏ qua SP có price == null", nullPriceMap.isEmpty());
 
         // Bài 2
         check("Bài 2 - Tra giá sku viết thường có dấu cách",
@@ -114,6 +106,8 @@ public class Module3Practice {
         Map<String, Integer> mergedCart = bai6_congDonGioHangTheoSku(cart1, cart2);
         check("Bài 6 🪨 - Cộng dồn giỏ hàng (không crash Map.of)",
                 Map.of("SKU-01", 5, "SKU-02", 1, "SKU-03", 4).equals(mergedCart));
+        check("Bài 6 🪨 - cart1 null không crash",
+                Map.of("SKU-01", 3, "SKU-03", 4).equals(bai6_congDonGioHangTheoSku(null, cart2)));
 
         // Bài 7
         check("Bài 7 - Danh mục nhiều SP nhất",
@@ -135,16 +129,15 @@ public class Module3Practice {
                 new OrderLine("SKU-KHONG-CO", 5),
                 null
         );
-        // 38000 * 2 + 65000 * 1 = 141000
         check("Bài 9 🪨 - Tổng tiền đơn hàng tra từ catalog",
                 new BigDecimal("141000").compareTo(bai9_tinhTongTienDonHang(orderLines, catalog)) == 0);
 
         // Bài 10 🪨
         Map<String, Integer> stockMap = Map.of("SKU-01", 5, "SKU-02", 0);
         Map<String, Integer> orderQty = new LinkedHashMap<>();
-        orderQty.put("SKU-01", 3);   // Đủ (3 <= 5)
-        orderQty.put("SKU-02", 1);   // Thiếu (1 > 0)
-        orderQty.put("SKU-99", 2);   // Không có trong stockMap -> tồn = 0 -> Thiếu!
+        orderQty.put("SKU-01", 3);
+        orderQty.put("SKU-02", 1);
+        orderQty.put("SKU-99", 2);
         check("Bài 10 🪨 - Tìm các SKU không đủ hàng",
                 List.of("SKU-02", "SKU-99").equals(bai10_timSkuKhongDuHang(stockMap, orderQty)));
 
@@ -164,192 +157,252 @@ public class Module3Practice {
                 new BigDecimal("20000").compareTo(bai12_tinhPhiShipBangMap(new BigDecimal("200000"), "hn")) == 0);
         check("Bài 12 - Phí ship tỉnh khác (mặc định 35k)",
                 new BigDecimal("35000").compareTo(bai12_tinhPhiShipBangMap(new BigDecimal("200000"), "CAN_THO")) == 0);
+        check("Bài 12 - Phí ship tỉnh null (mặc định 35k)",
+                new BigDecimal("35000").compareTo(bai12_tinhPhiShipBangMap(new BigDecimal("200000"), null)) == 0);
         check("Bài 12 - Freeship đơn >= 500k",
                 BigDecimal.ZERO.compareTo(bai12_tinhPhiShipBangMap(new BigDecimal("500000"), "HN")) == 0);
     }
 
-    /**
-     * BÀI 1 (Tạo bảng tra cứu giá): Chuyển danh sách `ProductItem` thành `Map<String, BigDecimal>` (sku -> price).
-     * - Ngữ cảnh: Khi khởi động app hoặc tính giỏ hàng, thay vì mỗi lần tìm giá phải quét cả list,
-     *   ta dựng sẵn 1 bảng tra cứu `sku -> price` để tra trong O(1).
-     * - Ví dụ luồng dữ liệu:
-     *   + Đầu vào: [ (" sku-01 ", price=38000), ("SKU-02", price=28000), (null, price=10000) ]
-     *   + Bước 1: Bỏ qua item == null, sku null/rỗng sau trim, hoặc price == null.
-     *   + Bước 2: Chuẩn hóa sku (trim + IN HOA) -> đưa vào map: map.put("SKU-01", 38000)
-     *   + Đầu ra: { "SKU-01": 38000, "SKU-02": 28000 }
-     */
+    /** BÀI 1: Tạo bảng tra cứu giá (sku -> price), bỏ qua item/sku/price không hợp lệ. */
     public static Map<String, BigDecimal> bai1_taoBangGiaTheoSku(List<ProductItem> items) {
-        // TODO: Viết code của bạn ở đây
-        return new HashMap<>();
+        if (items == null || items.isEmpty()) {
+            return new HashMap<>();
+        }
+        Map<String, BigDecimal> priceMap = new HashMap<>(items.size());
+        for (ProductItem item : items) {
+            if (item == null || item.price == null) {
+                continue;
+            }
+            String normalizedSku = normalizeUpper(item.sku);
+            if (normalizedSku == null) {
+                continue;
+            }
+            priceMap.put(normalizedSku, item.price);
+        }
+        return priceMap;
     }
 
-    /**
-     * BÀI 2 (Tra cứu an toàn với getOrDefault): Lấy giá theo `sku` từ `priceMap`.
-     * - Ngữ cảnh: Frontend gửi lên mã `sku` cần báo giá (có thể gõ chữ thường, dính dấu cách hoặc sai mã).
-     * - Ví dụ luồng dữ liệu:
-     *   + Đầu vào: priceMap = {"SKU-01": 38000}, sku = "  sku-01 " -> Đầu ra: 38000
-     *   + Đầu vào: priceMap = {"SKU-01": 38000}, sku = "SKU-999"   -> Đầu ra: 0 (BigDecimal.ZERO)
-     * - Công cụ: `priceMap.getOrDefault(normalizedSku, BigDecimal.ZERO)`
-     */
+    /** BÀI 2: Tra giá an toàn theo sku, xử lý cả trường hợp value trong Map bị null. */
     public static BigDecimal bai2_traGiaSanPham(Map<String, BigDecimal> priceMap, String sku) {
-        // TODO: Viết code của bạn ở đây
-        return BigDecimal.ZERO;
+        if (priceMap == null || priceMap.isEmpty()) {
+            return BigDecimal.ZERO;
+        }
+        String normalizedSku = normalizeUpper(sku);
+        if (normalizedSku == null) {
+            return BigDecimal.ZERO;
+        }
+        BigDecimal price = priceMap.get(normalizedSku);
+        return price != null ? price : BigDecimal.ZERO;
     }
 
-    /**
-     * BÀI 3 (Đếm tần suất — bài kinh điển nhất của HashMap): Đếm số sản phẩm thuộc mỗi `category`.
-     * - Ngữ cảnh: Trên màn hình bộ lọc danh mục của App, bên cạnh tên danh mục cần hiện số lượng
-     *   (vd: "Sữa tươi (2)", "Sữa chua (1)").
-     * - Ví dụ luồng dữ liệu:
-     *   + Đầu vào: [ SP1("Sữa tươi"), SP2("Sữa chua"), SP3("Phô mai"), SP4("Sữa tươi") ]
-     *   + Duyệt từng SP: `countMap.put(cat, countMap.getOrDefault(cat, 0) + 1);`
-     *   + Đầu ra: { "Sữa tươi": 2, "Sữa chua": 1, "Phô mai": 1 }
-     * - Lưu ý: Bỏ qua item == null hoặc category null/rỗng sau trim; giữ nguyên chữ hoa/thường sau trim.
-     */
+    /** BÀI 3: Đếm số sản phẩm theo từng category (giữ nguyên hoa/thường sau trim). */
     public static Map<String, Integer> bai3_demSoLuongTheoDanhMuc(List<ProductItem> items) {
-        // TODO: Viết code của bạn ở đây
-        return new HashMap<>();
+        if (items == null || items.isEmpty()) {
+            return new HashMap<>();
+        }
+        Map<String, Integer> countMap = new HashMap<>();
+        for (ProductItem item : items) {
+            if (item == null) {
+                continue;
+            }
+            String category = normalizeKeepCase(item.category);
+            if (category == null) {
+                continue;
+            }
+            countMap.put(category, countMap.getOrDefault(category, 0) + 1);
+        }
+        return countMap;
     }
 
-    /**
-     * BÀI 4 (Cộng dồn tồn kho theo danh mục): Tính TỔNG `stock` của từng `category`.
-     * - Ngữ cảnh: Báo cáo tồn kho cho biết mỗi ngành hàng còn tổng cộng bao nhiêu sản phẩm trong kho.
-     * - Ví dụ luồng dữ liệu:
-     *   + Đầu vào: [ SP1("Sữa tươi", stock=10), SP2("Sữa chua", stock=0), SP4("Sữa tươi", stock=2) ]
-     *   + Bước 1: Gặp SP1 -> "Sữa tươi" = 0 + 10 = 10
-     *   + Bước 2: Gặp SP2 -> "Sữa chua" = 0 + 0 = 0
-     *   + Bước 3: Gặp SP4 -> "Sữa tươi" = 10 + 2 = 12
-     *   + Đầu ra: { "Sữa tươi": 12, "Sữa chua": 0 } (chú ý: nếu item.stock < 0 thì bỏ qua hoặc coi như 0).
-     */
+    /** BÀI 4: Tính tổng tồn kho theo từng category (bỏ qua dòng có stock < 0). */
     public static Map<String, Integer> bai4_tinhTongTonKhoTheoDanhMuc(List<ProductItem> items) {
-        // TODO: Viết code của bạn ở đây
-        return new HashMap<>();
+        if (items == null || items.isEmpty()) {
+            return new HashMap<>();
+        }
+        Map<String, Integer> stockByCat = new HashMap<>();
+        for (ProductItem item : items) {
+            if (item == null || item.stock < 0) {
+                continue;
+            }
+            String category = normalizeKeepCase(item.category);
+            if (category == null) {
+                continue;
+            }
+            stockByCat.put(category, stockByCat.getOrDefault(category, 0) + item.stock);
+        }
+        return stockByCat;
     }
 
-    /**
-     * BÀI 5 (Cộng dồn tiền theo danh mục): Tính tổng giá trị tồn kho (`price * stock`) cho từng `category`.
-     * - Ngữ cảnh: Kế toán muốn xem tổng tiền vốn đang nằm ở từng ngành hàng trên Dashboard.
-     * - Ví dụ luồng dữ liệu:
-     *   + Đầu vào: [ SP1("Sữa tươi", 38000 * 10), SP2("Sữa chua", 28000 * 0), SP4("Sữa tươi", 42000 * 2) ]
-     *   + Đầu ra: { "Sữa tươi": 464000, "Sữa chua": 0 }
-     * - Công cụ: `BigDecimal current = valueMap.getOrDefault(cat, BigDecimal.ZERO);`
-     *            `valueMap.put(cat, current.add(itemValue));`
-     */
+    /** BÀI 5: Tính tổng giá trị tồn kho (price * stock) theo từng category. */
     public static Map<String, BigDecimal> bai5_tinhGiaTriTonKhoTheoDanhMuc(List<ProductItem> items) {
-        // TODO: Viết code của bạn ở đây
-        return new HashMap<>();
+        if (items == null || items.isEmpty()) {
+            return new HashMap<>();
+        }
+        Map<String, BigDecimal> valueByCat = new HashMap<>();
+        for (ProductItem item : items) {
+            if (item == null || item.price == null || item.stock < 0) {
+                continue;
+            }
+            String category = normalizeKeepCase(item.category);
+            if (category == null) {
+                continue;
+            }
+            BigDecimal itemValue = item.stock == 0
+                    ? BigDecimal.ZERO
+                    : item.price.multiply(BigDecimal.valueOf(item.stock));
+            BigDecimal current = valueByCat.getOrDefault(category, BigDecimal.ZERO);
+            valueByCat.put(category, current.add(itemValue));
+        }
+        return valueByCat;
     }
 
-    /**
-     * BÀI 6 🪨 (Gộp 2 giỏ hàng): Cộng dồn số lượng từ `cart1` và `cart2` (sku -> quantity) thành 1 Map mới.
-     * - Ngữ cảnh: Khách chưa đăng nhập thêm hàng vào giỏ tạm (`cart2`), sau đó đăng nhập và gộp vào
-     *   giỏ cũ trên tài khoản (`cart1`).
-     * - Ví dụ luồng dữ liệu:
-     *   + Đầu vào: cart1 = {"SKU-01": 2, "SKU-02": 1}, cart2 = {" sku-01 ": 3, "SKU-03": 4}
-     *   + Bước 1: Chuẩn hóa sku (trim + IN HOA) và cộng dồn số lượng của cả 2 cart (chỉ cộng qty > 0).
-     *   + Đầu ra: {"SKU-01": 5, "SKU-02": 1, "SKU-03": 4}
-     * - 🪨 Gợi ý: ĐỪNG sửa trực tiếp lên `cart1` (như `cart1.put(...)`) — nếu bên gọi truyền `Map.of(...)`
-     *   (chỉ đọc) vào thì chương trình sẽ nổ lỗi `UnsupportedOperationException` ngay!
-     */
+    /** BÀI 6 🪨: Cộng dồn 2 giỏ hàng vào Map mới, an toàn với Map.of và null. */
     public static Map<String, Integer> bai6_congDonGioHangTheoSku(
             Map<String, Integer> cart1, Map<String, Integer> cart2) {
-        // TODO: Viết code của bạn ở đây
-        return new HashMap<>();
+        Map<String, Integer> merged = new HashMap<>();
+        mergeCartInto(cart1, merged);
+        mergeCartInto(cart2, merged);
+        return merged;
     }
 
-    /**
-     * BÀI 7 (Duyệt Map bằng `entrySet()`): Tìm tên danh mục có số lượng sản phẩm nhiều nhất.
-     * - Ngữ cảnh: Hiển thị badge "Ngành hàng nổi bật nhất" từ bảng thống kê `countByCategory`.
-     * - Ví dụ luồng dữ liệu:
-     *   + Đầu vào: {"Sữa tươi": 2, "Sữa chua": 1, "Phô mai": 1} -> Đầu ra: "Sữa tươi"
-     *   + Đầu vào: null hoặc {} -> Đầu ra: null
-     * - Công cụ: Duyệt `for (Map.Entry<String, Integer> entry : countByCategory.entrySet())`
-     *            Lấy key = `entry.getKey()`, value = `entry.getValue()`.
-     */
+    private static void mergeCartInto(Map<String, Integer> source, Map<String, Integer> target) {
+        if (source == null || source.isEmpty()) {
+            return;
+        }
+        for (Map.Entry<String, Integer> entry : source.entrySet()) {
+            String normalizedSku = normalizeUpper(entry.getKey());
+            Integer qty = entry.getValue();
+            if (normalizedSku == null || qty == null || qty <= 0) {
+                continue;
+            }
+            target.put(normalizedSku, target.getOrDefault(normalizedSku, 0) + qty);
+        }
+    }
+
+    /** BÀI 7: Tìm tên danh mục có số lượng sản phẩm nhiều nhất. */
     public static String bai7_timDanhMucNhieuSanPhamNhat(Map<String, Integer> countByCategory) {
-        // TODO: Viết code của bạn ở đây
-        return null;
+        if (countByCategory == null || countByCategory.isEmpty()) {
+            return null;
+        }
+        String bestCategory = null;
+        int maxCount = 0;
+        for (Map.Entry<String, Integer> entry : countByCategory.entrySet()) {
+            String category = normalizeKeepCase(entry.getKey());
+            Integer count = entry.getValue();
+            if (category == null || count == null || count <= 0) {
+                continue;
+            }
+            if (count > maxCount) {
+                bestCategory = category;
+                maxCount = count;
+            }
+        }
+        return bestCategory;
     }
 
-    /**
-     * BÀI 8 (Gom nhóm dữ liệu — Group By): Gom danh sách `sku` theo từng `category`.
-     * - Ngữ cảnh: Trang chủ App hiển thị từng block theo ngành hàng:
-     *   "Sữa tươi" -> ["SKU-01", "SKU-04"], "Phô mai" -> ["SKU-03"].
-     * - Ví dụ luồng dữ liệu:
-     *   + Đầu vào: [ SP("SKU-01", "Sữa tươi"), SP("SKU-03", "Phô mai"), SP("SKU-04", "Sữa tươi") ]
-     *   + Đầu ra: { "Sữa tươi": ["SKU-01", "SKU-04"], "Phô mai": ["SKU-03"] }
-     * - Công cụ (tương đương `groups[cat] ??= []; groups[cat].push(sku);` bên JS):
-     *   `groups.computeIfAbsent(cat, k -> new ArrayList<>()).add(item.sku);`
-     */
+    /** BÀI 8: Gom nhóm danh sách SKU theo từng category (giữ thứ tự). */
     public static Map<String, List<String>> bai8_gomNhomSkuTheoDanhMuc(List<ProductItem> items) {
-        // TODO: Viết code của bạn ở đây
-        return new LinkedHashMap<>();
+        if (items == null || items.isEmpty()) {
+            return new LinkedHashMap<>();
+        }
+        Map<String, List<String>> groups = new LinkedHashMap<>();
+        for (ProductItem item : items) {
+            if (item == null) {
+                continue;
+            }
+            String category = normalizeKeepCase(item.category);
+            String sku = normalizeKeepCase(item.sku);
+            if (category == null || sku == null) {
+                continue;
+            }
+            groups.computeIfAbsent(category, k -> new ArrayList<>()).add(sku);
+        }
+        return groups;
     }
 
-    /**
-     * BÀI 9 🪨 (Tính tiền đơn hàng chuẩn O(1)): Tính tổng tiền của `orderLines` dựa trên bảng `catalog`.
-     * - Ngữ cảnh: Khách bấm đặt hàng gồm nhiều dòng `(sku, quantity)`. Backend phải tra giá gốc từ
-     *   `catalog` (KHÔNG tin giá từ client gửi lên!).
-     * - Ví dụ luồng dữ liệu:
-     *   + Đầu vào: orderLines = [("  sku-01 ", qty=2), ("SKU-03", qty=1), ("SKU-KHONG-CO", qty=5)]
-     *   + Bước 1: Dựng `Map<String, BigDecimal>` (hoặc tái sử dụng `bai1_taoBangGiaTheoSku(catalog)`) để tra giá O(1).
-     *   + Bước 2: Duyệt `orderLines` (bỏ qua dòng null hoặc `qty <= 0`), tìm giá theo `sku` đã chuẩn hóa;
-     *             nếu không thấy trong catalog thì bỏ qua (giá = 0).
-     *   + Đầu ra: 38000*2 + 65000*1 = 141000
-     * - 🪨 Gợi ý: Đừng lồng 2 vòng `for (orderLines) { for (catalog) }` — nếu có 10.000 đơn x 10.000 SP sẽ treo API!
-     */
+    /** BÀI 9 🪨: Tính tổng tiền đơn hàng theo giá gốc trong catalog (tra cứu O(1)). */
     public static BigDecimal bai9_tinhTongTienDonHang(List<OrderLine> orderLines, List<ProductItem> catalog) {
-        // TODO: Viết code của bạn ở đây
-        return BigDecimal.ZERO;
+        if (orderLines == null || orderLines.isEmpty() || catalog == null || catalog.isEmpty()) {
+            return BigDecimal.ZERO;
+        }
+        Map<String, BigDecimal> priceMap = bai1_taoBangGiaTheoSku(catalog);
+        BigDecimal total = BigDecimal.ZERO;
+        for (OrderLine line : orderLines) {
+            if (line == null || line.quantity <= 0) {
+                continue;
+            }
+            BigDecimal unitPrice = bai2_traGiaSanPham(priceMap, line.sku);
+            if (unitPrice.signum() > 0) {
+                total = total.add(unitPrice.multiply(BigDecimal.valueOf(line.quantity)));
+            }
+        }
+        return total;
     }
 
-    /**
-     * BÀI 10 🪨 (Kiểm tra tồn kho trước khi chốt đơn): Trả về danh sách `sku` KHÔNG ĐỦ HÀNG theo đúng thứ tự `orderQty`.
-     * - Ngữ cảnh: Khách đặt mua các mã trong `orderQty` (`sku -> số lượng mua`). Cần đối chiếu với
-     *   `stockMap` (`sku -> tồn kho hiện tại`) để báo lỗi những mã khách đặt vượt quá tồn kho.
-     * - Ví dụ luồng dữ liệu:
-     *   + Đầu vào: stockMap = {"SKU-01": 5, "SKU-02": 0}, orderQty = {"SKU-01": 3, "SKU-02": 1, "SKU-99": 2}
-     *   + "SKU-01": đặt 3 <= tồn 5 (Đủ)
-     *   + "SKU-02": đặt 1 > tồn 0 (Thiếu!)
-     *   + "SKU-99": không có trong stockMap -> coi như tồn = 0 -> đặt 2 > 0 (Thiếu!)
-     *   + Đầu ra: ["SKU-02", "SKU-99"]
-     * - 🪨 Gợi ý: Nếu bạn viết `int tonKho = stockMap.get(sku);` khi `sku` không có trong `stockMap`,
-     *   `stockMap.get("SKU-99")` trả về `null` và Java ép `null` sang `int` sẽ nổ `NullPointerException` ngay!
-     */
+    /** BÀI 10 🪨: Trả về danh sách SKU không đủ hàng theo đúng thứ tự orderQty. */
     public static List<String> bai10_timSkuKhongDuHang(
             Map<String, Integer> stockMap, Map<String, Integer> orderQty) {
-        // TODO: Viết code của bạn ở đây
-        return new ArrayList<>();
+        if (orderQty == null || orderQty.isEmpty()) {
+            return new ArrayList<>();
+        }
+        List<String> insufficientSkus = new ArrayList<>();
+        for (Map.Entry<String, Integer> entry : orderQty.entrySet()) {
+            String normalizedSku = normalizeUpper(entry.getKey());
+            Integer qty = entry.getValue();
+            if (normalizedSku == null || qty == null || qty <= 0) {
+                continue;
+            }
+            Integer stockObj = stockMap != null ? stockMap.get(normalizedSku) : null;
+            int stock = stockObj != null ? stockObj : 0;
+            if (stock < qty) {
+                insufficientSkus.add(normalizedSku);
+            }
+        }
+        return insufficientSkus;
     }
 
-    /**
-     * BÀI 11 🪨 (Thống kê sản phẩm theo mức giá — Bẫy BigDecimal làm Key):
-     * - Ngữ cảnh: Thống kê xem mỗi mức giá đang có bao nhiêu sản phẩm (`price -> số lượng SP`).
-     * - Ví dụ luồng dữ liệu:
-     *   + Đầu vào: [ SP("38000"), SP("38000.00"), SP("65000.0") ]
-     *   + Bước 1: Chuẩn hóa `item.price.stripTrailingZeros()` trước khi cho vào key của `HashMap`!
-     *   + Đầu ra: { 38000: 2, 65000: 1 } (chỉ có 2 mức giá chứ KHÔNG phải 3!)
-     * - 🪨 Gợi ý: `new BigDecimal("38000")` và `new BigDecimal("38000.00")` có `.equals()` là `FALSE`!
-     *   Nên nếu bỏ thẳng `item.price` làm key của `HashMap`, chúng sẽ bị tách làm 2 dòng khác nhau!
-     */
+    /** BÀI 11 🪨: Thống kê số lượng sản phẩm theo mức giá, chuẩn hóa scale BigDecimal trước khi làm key. */
     public static Map<BigDecimal, Integer> bai11_thongKeSoLuongTheoMucGia(List<ProductItem> items) {
-        // TODO: Viết code của bạn ở đây
-        return new HashMap<>();
+        if (items == null || items.isEmpty()) {
+            return new HashMap<>();
+        }
+        Map<BigDecimal, Integer> priceStats = new HashMap<>();
+        for (ProductItem item : items) {
+            if (item == null || item.price == null) {
+                continue;
+            }
+            BigDecimal normalizedPrice = item.price.stripTrailingZeros();
+            priceStats.put(normalizedPrice, priceStats.getOrDefault(normalizedPrice, 0) + 1);
+        }
+        return priceStats;
     }
 
-    /**
-     * BÀI 12 (Bảng cấu hình `Map.of` thay cho `switch-case` dài dòng): Tính phí ship theo mã tỉnh.
-     * - Ngữ cảnh: Thay vì viết chuỗi `if/else` hoặc `switch` dài hàng chục tỉnh thành, backend lưu
-     *   bảng phí ship dạng `Map<String, BigDecimal>` để tra cứu trong 1 dòng.
-     * - Quy tắc:
-     *   + Nếu `orderTotal != null && orderTotal >= 500_000` -> trả về `BigDecimal.ZERO` (Freeship).
-     *   + Ngược lại, tra bảng hằng số `Map.of("HN", new BigDecimal("20000"), "HCM", new BigDecimal("25000"), "DN", new BigDecimal("25000"))`
-     *     (chuẩn hóa `provinceCode` trim + IN HOA trước khi tra); nếu tỉnh khác hoặc `null` -> trả về `35000`.
-     * - Ví dụ: (200000, "hn") -> 20000; (200000, "CAN_THO") -> 35000; (500000, "HN") -> 0.
-     */
+    /** BÀI 12: Tính phí ship bằng bảng hằng số Map.of + getOrDefault. */
     public static BigDecimal bai12_tinhPhiShipBangMap(BigDecimal orderTotal, String provinceCode) {
-        // TODO: Viết code của bạn ở đây
-        return BigDecimal.ZERO;
+        if (orderTotal != null && orderTotal.compareTo(FREESHIP_THRESHOLD) >= 0) {
+            return BigDecimal.ZERO;
+        }
+        String normalizedProvince = normalizeUpper(provinceCode);
+        if (normalizedProvince == null) {
+            return DEFAULT_SHIP_FEE;
+        }
+        return SHIP_FEES.getOrDefault(normalizedProvince, DEFAULT_SHIP_FEE);
+    }
+
+    private static String normalizeUpper(String raw) {
+        if (raw == null) {
+            return null;
+        }
+        String trimmed = raw.trim();
+        return trimmed.isEmpty() ? null : trimmed.toUpperCase(Locale.ROOT);
+    }
+
+    private static String normalizeKeepCase(String raw) {
+        if (raw == null) {
+            return null;
+        }
+        String trimmed = raw.trim();
+        return trimmed.isEmpty() ? null : trimmed;
     }
 
     private static void check(String tenBai, boolean passed) {

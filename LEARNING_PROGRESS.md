@@ -52,16 +52,23 @@
     5. **Check cha quên con (`item != null` nhưng `item.category == null`):** Java không có `?.` như JS; gọi `.trim()` lên field có thể `null` sẽ nổ NPE.
     6. **Auto-import nhầm package:** Vd `org.springframework.cglib.core.Local` thay vì `java.util.Locale` — thấy lỗi lạ ở class quen phải kiểm tra lại phần `import` đầu file.
     7. **`List.of(...)` là bất biến & `subList(0, n)` chặt hơn `slice(0, n)`:** `List.of` cấm `null` và cấm xóa/sửa; `subList` nổ lỗi nếu `end > size()`.
-- **Module 3 ([Module3Practice.java](src/main/java/com/learning/javacore/module3/Module3Practice.java)) — ▶️ ĐANG HỌC (Next, đã soạn sẵn 12 bài):**
-  - Nội dung: `Map<K, V>` (`HashMap`, `LinkedHashMap`), `put`, `getOrDefault`, `containsKey`, `entrySet`, `computeIfAbsent`, `Map.of`, và 4 bài 🪨 gài sẵn bẫy thực tế (kể cả S3, S4, S5 từ `deferred-scars.md`).
+- **Module 3 ([Module3Practice.java](src/main/java/com/learning/javacore/module3/Module3Practice.java)) — ✅ ĐÃ HOÀN THÀNH (12 bài / 22/22 PASS sau khi tối ưu Senior):**
+  - Đã nắm: `Map<K, V>` (`HashMap`, `LinkedHashMap`), `put`, `getOrDefault`, `entrySet`, `computeIfAbsent`, `Map.of`, tra cứu O(1), `BigDecimal.stripTrailingZeros()`.
+  - **🩹 Vết sẹo đã học ở Module 3 (đã tiêu hóa `S3`, `S4`, `S5`):**
+    1. **`getOrDefault(k, default)` KHÔNG cứu được value `null`:** Nếu `map.put("A", null)` thì `getOrDefault("A", 0)` vẫn trả `null` (khác JS `??`) $\rightarrow$ luôn chặn `value == null` trước khi `put` và kiểm tra giá trị trả về.
+    2. **`BigDecimal` làm key `HashMap` (`S4`):** `38000` != `38000.00` nếu chưa `.stripTrailingZeros()`.
+    3. **Không mutate `Map.of(...)` / `List.of(...)` (`S5`):** Gọi `put`/`add` hoặc truyền `null` sẽ nổ `UnsupportedOperationException` / `NullPointerException`; luôn tạo `HashMap` mới khi gộp dữ liệu và đặt bảng hằng số làm `static final`.
+    4. **Tra cứu O(1) thay vì lồng 2 vòng `for` (`S3`):** Dựng `Map<String, BigDecimal>` trước khi tính tiền đơn hàng.
+- **Module 4 ([Module4Practice.java](src/main/java/com/learning/javacore/module4/Module4Practice.java)) — ▶️ ĐANG HỌC (Next, đã soạn sẵn 12 bài):**
+  - Nội dung: `enum` (có field + method + rule chuyển trạng thái), `Class` & đóng gói (`private`, validate constructor, Defensive Copy), `equals()` & `hashCode()` (`S1`, `S2`), `Interface` & Đa hình (`DiscountRule`, `ProductSearchFilter`, `StockService`).
 
 ---
 
-### C. Cách học đã thống nhất (cập nhật 22/11)
+### C. Cách học đã thống nhất (cập nhật 26/11)
 - **Dạy công cụ trước khi giao bài:** Mọi hàm Java mới dùng trong bài tập phải được giới thiệu trước trong bảng đối chiếu RN/TS $\rightarrow$ Java + ví dụ luồng dữ liệu cụ thể (`Ngữ cảnh + Input -> từng bước -> Output`).
 - **Học bằng cách vấp ngã:** Mỗi module có 10–12+ bài, trong đó 3–4 bài gài "hòn đá tảng" 🪨 trên những thứ đã học để tự vấp và rút ra bài học.
 - **Sau mỗi bài học:** Mentor đưa mục "🩹 Vết sẹo Senior" (lỗi kinh điển + chuyện vui / liên hệ React Native), chỉ trong phạm vi đã học.
-- **Kiến thức quá tầm:** Được cất vào [deferred-scars.md](.agents/skills/java-mentor/references/deferred-scars.md) và sẽ được nhắc lại khi học tới module tương ứng (đang chờ 5 vết sẹo `S1..S5`, trong đó `S3, S4, S5` đã được gài vào Bài 6, 9, 11 của Module 3).
+- **Kiến thức quá tầm:** Được cất vào [deferred-scars.md](.agents/skills/java-mentor/references/deferred-scars.md) (hiện còn `S1`, `S2` gắn trực tiếp vào Bài 5 `🪨` và Bài 6 `🪨` của Module 4).
 
 ---
 
@@ -71,9 +78,9 @@
 | :---: | :--- | :--- | :---: |
 | **1** | `String`, `.equals()`, `BigDecimal`, `if/else`, `switch` (8 bài) | `src/main/java/com/learning/javacore/module1/Module1Practice.java` | **✅ Xong (21/21 PASS)** |
 | **2** | `List` (`ArrayList`), `Set` (`HashSet`/`LinkedHashSet`), vòng lặp `for` (12 bài) | `src/main/java/com/learning/javacore/module2/Module2Practice.java` | **✅ Xong (19/19 PASS)** |
-| **3** | `Map<K, V>` (`HashMap`/`LinkedHashMap`), `getOrDefault`, đếm & gom nhóm dữ liệu (12 bài) | `src/main/java/com/learning/javacore/module3/Module3Practice.java` | **▶️ ĐANG HỌC (Next)** |
-| **4** | `Class`, `Interface`, `Enum`, tính đóng gói & đa hình (10–12 bài) | *(Chưa tạo — tạo sau khi xong Module 3)* | ⬜ Chưa học |
-| **5** | `Optional<T>`, Null Safety & `Exception` (`try-catch`, `throw`, Custom Exception) (10–12 bài) | *(Chưa tạo)* | ⬜ Chưa học |
+| **3** | `Map<K, V>` (`HashMap`/`LinkedHashMap`), `getOrDefault`, đếm & gom nhóm dữ liệu (12 bài) | `src/main/java/com/learning/javacore/module3/Module3Practice.java` | **✅ Xong (22/22 PASS)** |
+| **4** | `Class`, `Interface`, `Enum`, `equals/hashCode` & Đa hình (12 bài) | `src/main/java/com/learning/javacore/module4/Module4Practice.java` | **▶️ ĐANG HỌC (Next)** |
+| **5** | `Optional<T>`, Null Safety & `Exception` (`try-catch`, `throw`, Custom Exception) (10–12 bài) | *(Chưa tạo — tạo sau khi xong Module 4)* | ⬜ Chưa học |
 | **6** | `Stream API` & Lambda (`filter`, `map`, `sorted`, `groupingBy`) (10–12 bài) | *(Chưa tạo)* | ⬜ Chưa học |
 
 ### Sau khi xong 6 Module Core Java $\rightarrow$ Quay lại Spring Boot Production (`com.learning.backend`)
@@ -88,11 +95,11 @@ Các file khung đã tạo sẵn chờ hoàn thiện:
 ## 4. Lệnh hay dùng trên cả 2 máy
 - **Chạy bài tập Core Java (< 1 giây, không cần cache Maven):**
   ```bash
-  java src/main/java/com/learning/javacore/module3/Module3Practice.java
+  java src/main/java/com/learning/javacore/module4/Module4Practice.java
   ```
 - **Chạy qua Maven offline (sau khi đã chạy `./mvnw compile` 1 lần có mạng):**
   ```bash
-  ./mvnw -o compile -q && java -cp target/classes com.learning.javacore.module3.Module3Practice
+  ./mvnw -o compile -q && java -cp target/classes com.learning.javacore.module4.Module4Practice
   ```
 - **Chạy Spring Boot server (test Swagger `/swagger-ui.html` & H2 `/h2-console`):**
   ```bash
@@ -122,8 +129,7 @@ Cài nhanh các extension ID sau trên máy mới để có auto-import, báo l�
 
 ---
 
-## 6. Câu nhắn mở đầu ngày mai trên máy công ty
+## 6. Câu nhắn mở đầu buổi sau trên máy bất kỳ
 1. `git pull` để lấy code mới nhất.
-2. Nếu máy công ty chưa từng chạy Maven project này, chạy `./mvnw compile` 1 lần khi có mạng (hoặc chạy thẳng `java src/main/java/com/learning/javacore/module3/Module3Practice.java`).
-3. Mở Antigravity chat mới và nhắn:
-   `"Đọc LEARNING_PROGRESS.md, mình tiếp tục học Module 3 đang dở nhé"`
+2. Mở Antigravity chat mới và nhắn:
+   `"Đọc LEARNING_PROGRESS.md, mình tiếp tục học Module 4 đang dở nhé"`
