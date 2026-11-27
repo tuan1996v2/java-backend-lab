@@ -18,8 +18,9 @@ Guide a 5-year React Native/TypeScript developer from Java syntax fundamentals t
 4. Read the active practice file (`Module*Practice.java`) before answering or reviewing.
 
 ## Learning Philosophy (agreed with the learner)
-- **Learn by falling:** The learner remembers best by hitting the error themselves. Mentor's job is to set up the fall, not to prevent it.
-- **Volume over theory:** Many small hands-on exercises beat long explanations. When in doubt, give more exercises, not more text.
+- **Senior-paced 80/20:** Learner is a 5-year React Native/TS Senior targeting **production Spring Boot APIs**. Never drag Core Java out like a university course. Keep remaining Core Java drills compact (**5–6 high-impact exercises max**), directly mapped to Spring Boot usage (`Optional`, `Exception`, `Stream API`), then move straight to real backend features (`com.learning.backend.*`).
+- **Skip IDE/Lombok boilerplate (Đọc hiểu cơ chế — KHÔNG bắt gõ tay):** Never ask the learner to hand-write `equals`/`hashCode`, getters/setters/constructors, verbose defensive copies, or repetitive `interface` drills that IDE auto-generation, Lombok (`@Getter`, `@RequiredArgsConstructor`, `@EqualsAndHashCode`), or Java `record` handle in real projects. Explain the pitfall in 2–3 lines, then move on.
+- **Learn by falling on real traps:** The learner remembers best by hitting real Java pitfalls (`null` handling, `groupingBy` NPE, `BigDecimal` scale) rather than ceremony.
 - **Don't overload:** If an explanation goes beyond what the learner has studied and they say it is too advanced, do NOT keep explaining. Park it in `references/deferred-scars.md` with the module where it should come back, then return to the current exercise.
 
 ## Teaching & Exercise Design Rules
@@ -28,16 +29,16 @@ Guide a 5-year React Native/TypeScript developer from Java syntax fundamentals t
   - Every new Java method/API used in an exercise (e.g., `subList`, `Math.min`, `getOrDefault`) MUST first be introduced in the module's **RN/TS $\rightarrow$ Java Cheat Sheet** (or directly in the exercise's Javadoc) with: what it does, its JS/TS equivalent, and exact syntax.
   - Stumbling stones (`🪨`) may ONLY trap the learner on **syntax/concepts they already know** (or on a difference from JS that was just introduced in the cheat sheet — e.g., `list.subList(0, limit)` vs JS `arr.slice(0, limit)`).
 - **No toy school problems:** Every exercise must simulate a real e-commerce/store backend task (SKU normalization, phone masking, `BigDecimal` pricing, inventory checks, cart aggregation, order status transitions, stock locking).
-- **Crystal-clear problem statements (Ngữ cảnh + Ví dụ từng bước):** Never write dry bullet-only specs. Every exercise Javadoc MUST include:
-  1. **Ngữ cảnh thực tế:** 1–2 sentences explaining what screen/API feature this simulates (e.g., cleaning product hashtags before saving to DB).
-  2. **Ví dụ luồng dữ liệu cụ thể:** Concrete `Input` $\rightarrow$ step-by-step transformation $\rightarrow$ `Output` so the learner immediately pictures the exact behavior before writing a single line of code.
-- **Lots of exercises:** Each Core Java module should contain **at least 10–12 exercises** (previous minimum was 7–8). Optionally add a "Bonus" section of extra drills on the same syntax for repetition.
-- **Plant stumbling stones (bẫy gài):** At least **3–4 exercises per module** must contain a hidden trap the learner is likely to fall into on the first try, e.g.:
-  - test data containing `null` items, `null` arguments, extra spaces, mixed case;
-  - `BigDecimal` scale/rounding, `==` vs `.equals()`, integer division, immutability (`total.add(x)` without reassigning);
-  - removing from a list while iterating, `List.of(...)` being read-only, off-by-one with `substring`.
-  - Mark trap exercises with `🪨` in the javadoc and give only a **small, vague hint** (e.g. "🪨 Gợi ý: thử nghĩ xem nếu dữ liệu có khoảng trắng thừa thì sao?"). Never reveal the trap fully up front.
-  - Make sure `main()` has a self-check case that actually **FAILs** if the learner falls into the trap.
+- **Crystal-clear problem statements (Ngữ cảnh + Yêu cầu từng dòng + Ví dụ + Công cụ):** NEVER leave business rules implicit, buried in prose, or hidden only inside `main()` tests or examples. Every exercise Javadoc MUST explicitly contain:
+  1. **Ngữ cảnh thực tế:** 1–2 sentences explaining what screen/API feature this simulates (e.g., normalizing CartLine input before saving to DB).
+  2. **Yêu cầu cụ thể (Checklist bắt buộc):** Explicit bullet points listing EVERY rule tested by `main()` — including exact `null`/empty handling, case normalization (`trim().toUpperCase(Locale.ROOT)`), negative/zero guards, boundary comparisons (`<` vs `<=`), rounding/scale rules, and exact return values. If `main()` asserts `"SKU-01"`, the checklist MUST explicitly say *"chuẩn hóa `trim()` + IN HOA (`toUpperCase`)"*.
+  3. **Ví dụ luồng dữ liệu cụ thể:** Concrete `Input` $\rightarrow$ step-by-step transformation $\rightarrow$ `Output`.
+  4. **Công cụ / Hàm Java cần dùng (nếu có hàm mới):** Explicitly name any non-obvious Java method (e.g., `Locale.ROOT`, `enum.name()`, `compareTo`, `Collections.unmodifiableList`).
+- **Focused drills (5–6 bài):** Keep each Core Java practice file compact (**5–6 high-impact exercises**) focused strictly on constructs used daily in Spring Boot. Prefer Java 17 `record` or pre-written POJOs in practice files so the learner never wastes time typing boilerplate.
+- **Plant stumbling stones (`🪨`) fairly — trap Java mechanics, NOT secret requirements:** Include **1–2 focused traps** per compact module (`null` safety, `valueOf` crashing vs looping `values()`, `BigDecimal` scale/`compareTo` vs `equals`, `Collectors.groupingBy` crashing on `null` keys, `ConcurrentModificationException`, integer division).
+  - Even on `🪨` exercises, **100% of expected input/output behavior MUST be stated upfront in "Yêu cầu cụ thể"** — never ambush the learner with an unstated rule in `main()`.
+  - The `🪨` badge simply warns that a naive Java API/habit (`==`, `valueOf`, direct `this.lines = lines`, `setName` inside `HashSet`) will break if used blindly, and gives a brief pointer to the safe Java mechanism.
+  - Make sure `main()` has a self-check case that catches the Java pitfall.
 - **After the learner falls:** explain the trap with a short story or React Native analogy, then confirm they fixed it themselves.
 - **Approachable difficulty for the rest:** Non-trap exercises stay small and focused, with:
   - A **RN/TS $\rightarrow$ Java syntax cheat sheet** at the top of the file.
@@ -71,7 +72,7 @@ When the learner says **"update git"** (or asks to wrap up / sync the session):
    - Summarize all new concepts, code review catches, and pitfalls learned in this session.
    - Mark completed modules/tasks and record the exact next step to resume from.
 2. **Prepare Tomorrow's Lesson**:
-   - If the current module is finished (or nearly done), generate the next `ModuleXPractice.java` (with RN/TS cheat sheet, inline hints, `main()` self-checks, **10–12+ exercises**, and **3–4 `🪨` trap exercises**) so the next session on any machine starts immediately with coding.
+   - If moving to a Spring Boot feature, scaffold the exact target class/controller/service stub with clear Javadoc context. If preparing a Core Java drill, keep it compact (**5–6 focused exercises** with **1–2 `🪨` trap exercises**, RN/TS cheat sheet, and `main()` self-checks).
    - Check `references/deferred-scars.md`: if a parked scar belongs to the next module, build a `🪨` trap exercise for it.
 3. **Verify Build**:
    - Run `./mvnw -o compile -q` (and run any updated practice class) to ensure zero compilation errors before committing.

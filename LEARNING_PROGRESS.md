@@ -9,11 +9,11 @@
 
 ## 1. Hồ sơ người học & Phương pháp thống nhất
 - **Nền tảng:** Dev Mobile **5 năm React Native (JS/TS)**, hiểu chắc API, JSON, REST, state, nhưng mới bắt đầu học Java & Spring Boot (chưa quen cú pháp Java).
-- **Phong cách học hiệu quả nhất đã chốt:**
-  - Học theo **Cách B: Làm vững móng Core Java thực chiến trước** (trong `src/main/java/com/learning/javacore/`), rồi mới quay lại các phần Spring Boot nâng cao (`com.learning.backend/`).
-  - So sánh trực tiếp **React Native / TypeScript $\leftrightarrow$ Java** trước mỗi module.
-  - Mỗi module gồm **7–8 bài tập nhỏ, dễ vừa sức, lặp nhiều lần để nhớ cú pháp**, gắn nghiệp vụ bán hàng thực tế (không lý thuyết suông).
-  - Chạy kiểm tra nhanh bằng hàm `main()` (tốn < 1 giây), **không ép viết JUnit test** cho các bài CRUD Spring Boot nhỏ.
+- **Phong cách học hiệu quả nhất đã chốt (Hướng A — 80/20 cho Senior Mobile):**
+  - Không cày Core Java kiểu sinh viên hay bắt gõ tay boilerplate mà IDE / Lombok / Java `record` tự làm (`equals`/`hashCode`, getter/setter, `Defensive Copy`, lặp lại `Interface`). Những phần này chỉ đọc hiểu cơ chế + vết sẹo rồi đi tiếp.
+  - Hoàn tất **1 module Core Java rút gọn cuối cùng (Module 5 — 6 bài)** gồm đúng 2 mảnh ghép dùng hàng ngày ở Spring Boot: **`Optional<T>` + `Exception`** và **`Stream API`**.
+  - Xong Module 5 là quay thẳng về **Spring Boot Production (`com.learning.backend/`)** để build API thật: MapStruct, JPA Specification + phân trang, Soft Delete, `Order`/`OrderItem` + `@Transactional` + Lock kho.
+  - So sánh trực tiếp **React Native / TypeScript $\leftrightarrow$ Java** và chạy kiểm tra nhanh bằng hàm `main()` (< 1 giây) cho Core Java, Swagger/H2 cho Spring Boot.
 
 ---
 
@@ -59,32 +59,34 @@
     2. **`BigDecimal` làm key `HashMap` (`S4`):** `38000` != `38000.00` nếu chưa `.stripTrailingZeros()`.
     3. **Không mutate `Map.of(...)` / `List.of(...)` (`S5`):** Gọi `put`/`add` hoặc truyền `null` sẽ nổ `UnsupportedOperationException` / `NullPointerException`; luôn tạo `HashMap` mới khi gộp dữ liệu và đặt bảng hằng số làm `static final`.
     4. **Tra cứu O(1) thay vì lồng 2 vòng `for` (`S3`):** Dựng `Map<String, BigDecimal>` trước khi tính tiền đơn hàng.
-- **Module 4 ([Module4Practice.java](src/main/java/com/learning/javacore/module4/Module4Practice.java)) — ▶️ ĐANG HỌC (Next, đã soạn sẵn 12 bài):**
-  - Nội dung: `enum` (có field + method + rule chuyển trạng thái), `Class` & đóng gói (`private`, validate constructor, Defensive Copy), `equals()` & `hashCode()` (`S1`, `S2`), `Interface` & Đa hình (`DiscountRule`, `ProductSearchFilter`, `StockService`).
+- **Module 4 ([Module4Practice.java](src/main/java/com/learning/javacore/module4/Module4Practice.java)) — ✅ XONG PHẦN CỐT LÕI (Bài 1–4 PASS, dừng đúng lúc theo Hướng A):**
+  - Đã nắm & tự code sạch: `enum` có `label` + luật chuyển trạng thái `canTransitionTo` + parse an toàn `fromCode` (dùng `OrderStatus.values()` & `.name()`), đóng gói & chuẩn hóa dữ liệu trong constructor (`CartLine`: `trim().toUpperCase(Locale.ROOT)` + chặn giá/số lượng âm).
+  - Đã đọc hiểu cơ chế `equals()` / `hashCode()` (`S1`), `HashSet` bucket (`S2`), `Defensive Copy` & `Interface` (không tốn thời gian gõ tay boilerplate vì IDE / Lombok / `record` xử lý trong dự án thật).
+- **Module 5 Rút gọn ([Module5Practice.java](src/main/java/com/learning/javacore/module5/Module5Practice.java)) — ▶️ ĐANG HỌC (Next, 6 bài thực chiến):**
+  - Tổng hợp đúng phần còn thiếu trước khi vào Spring Boot: Java 17 `record`, `Optional<T>` (`ofNullable`, `map`, `orElse`, `orElseThrow`), Custom `RuntimeException` (`throw` / `try-catch`), và `Stream API` (`filter`, `map`, `sorted`, `limit`, `groupingBy`).
 
 ---
 
-### C. Cách học đã thống nhất (cập nhật 26/11)
-- **Dạy công cụ trước khi giao bài:** Mọi hàm Java mới dùng trong bài tập phải được giới thiệu trước trong bảng đối chiếu RN/TS $\rightarrow$ Java + ví dụ luồng dữ liệu cụ thể (`Ngữ cảnh + Input -> từng bước -> Output`).
-- **Học bằng cách vấp ngã:** Mỗi module có 10–12+ bài, trong đó 3–4 bài gài "hòn đá tảng" 🪨 trên những thứ đã học để tự vấp và rút ra bài học.
-- **Sau mỗi bài học:** Mentor đưa mục "🩹 Vết sẹo Senior" (lỗi kinh điển + chuyện vui / liên hệ React Native), chỉ trong phạm vi đã học.
-- **Kiến thức quá tầm:** Được cất vào [deferred-scars.md](.agents/skills/java-mentor/references/deferred-scars.md) (hiện còn `S1`, `S2` gắn trực tiếp vào Bài 5 `🪨` và Bài 6 `🪨` của Module 4).
+### C. Cách học đã thống nhất (cập nhật 27/11 — Hướng A)
+- **Đề bài minh bạch 100%:** Mọi bài đều có 4 mục tách bạch (**Ngữ cảnh thực tế** $\rightarrow$ **Yêu cầu cụ thể khớp test `main()`** $\rightarrow$ **Ví dụ luồng dữ liệu** $\rightarrow$ **Công cụ Java**). Bẫy `🪨` chỉ gài bẫy cơ chế Java, tuyệt đối không giấu rule nghiệp vụ.
+- **Tối đa 5–6 bài / module Core Java:** Không lan man boilerplate IDE/Lombok; xong Module 5 rút gọn là vào thẳng Spring Boot (`com.learning.backend`).
+- **Sau mỗi bài học:** Mentor đưa mục "🩹 Vết sẹo Senior" ngắn gọn, liên hệ React Native/JS.
+- **Quản lý vết sẹo:** `S1`–`S5` đã xử lý/tiêu hoá trong [deferred-scars.md](.agents/skills/java-mentor/references/deferred-scars.md) (riêng `S2` sẽ thực hành lại khi tạo `@Entity` `Order`/`OrderItem` ở Spring Boot).
 
 ---
 
-## 3. Lộ trình 6 Module Core Java & Tiến độ hiện tại
+## 3. Lộ trình Core Java Rút gọn & Spring Boot Production
 
 | Module | Nội dung | File thực hành | Trạng thái |
 | :---: | :--- | :--- | :---: |
 | **1** | `String`, `.equals()`, `BigDecimal`, `if/else`, `switch` (8 bài) | `src/main/java/com/learning/javacore/module1/Module1Practice.java` | **✅ Xong (21/21 PASS)** |
 | **2** | `List` (`ArrayList`), `Set` (`HashSet`/`LinkedHashSet`), vòng lặp `for` (12 bài) | `src/main/java/com/learning/javacore/module2/Module2Practice.java` | **✅ Xong (19/19 PASS)** |
 | **3** | `Map<K, V>` (`HashMap`/`LinkedHashMap`), `getOrDefault`, đếm & gom nhóm dữ liệu (12 bài) | `src/main/java/com/learning/javacore/module3/Module3Practice.java` | **✅ Xong (22/22 PASS)** |
-| **4** | `Class`, `Interface`, `Enum`, `equals/hashCode` & Đa hình (12 bài) | `src/main/java/com/learning/javacore/module4/Module4Practice.java` | **▶️ ĐANG HỌC (Next)** |
-| **5** | `Optional<T>`, Null Safety & `Exception` (`try-catch`, `throw`, Custom Exception) (10–12 bài) | *(Chưa tạo — tạo sau khi xong Module 4)* | ⬜ Chưa học |
-| **6** | `Stream API` & Lambda (`filter`, `map`, `sorted`, `groupingBy`) (10–12 bài) | *(Chưa tạo)* | ⬜ Chưa học |
+| **4** | `Enum` có logic, đóng gói Constructor (`CartLine`); đọc hiểu `equals/hashCode`, `Interface` | `src/main/java/com/learning/javacore/module4/Module4Practice.java` | **✅ Xong phần cốt lõi (Bài 1–4)** |
+| **5 (Rút gọn)** | `Optional<T>`, `Exception` (`throw`, `CustomException`) & `Stream API` (`filter`, `map`, `sorted`, `groupingBy`) (6 bài) | `src/main/java/com/learning/javacore/module5/Module5Practice.java` | **▶️ ĐANG HỌC (Next)** |
 
-### Sau khi xong 6 Module Core Java $\rightarrow$ Quay lại Spring Boot Production (`com.learning.backend`)
-Các file khung đã tạo sẵn chờ hoàn thiện:
+### Ngay sau khi xong Module 5 Rút gọn $\rightarrow$ Quay thẳng về Spring Boot Production (`com.learning.backend`)
+Các tính năng tạo value thật đang chờ hoàn thiện:
 1. [ProductMapper.java](src/main/java/com/learning/backend/mapper/ProductMapper.java) — MapStruct + Lombok
 2. [PageResponse.java](src/main/java/com/learning/backend/dto/PageResponse.java) & [ProductSpecification.java](src/main/java/com/learning/backend/repository/ProductSpecification.java) — Phân trang + Lọc động 6 tiêu chí
 3. [BaseEntity.java](src/main/java/com/learning/backend/entity/BaseEntity.java) — JPA Auditing (`@CreatedDate`, `@LastModifiedDate`) + Soft Delete (`@SQLDelete`, `@SQLRestriction`) + Restore API
@@ -95,11 +97,11 @@ Các file khung đã tạo sẵn chờ hoàn thiện:
 ## 4. Lệnh hay dùng trên cả 2 máy
 - **Chạy bài tập Core Java (< 1 giây, không cần cache Maven):**
   ```bash
-  java src/main/java/com/learning/javacore/module4/Module4Practice.java
+  java src/main/java/com/learning/javacore/module5/Module5Practice.java
   ```
 - **Chạy qua Maven offline (sau khi đã chạy `./mvnw compile` 1 lần có mạng):**
   ```bash
-  ./mvnw -o compile -q && java -cp target/classes com.learning.javacore.module4.Module4Practice
+  ./mvnw -o compile -q && java -cp target/classes com.learning.javacore.module5.Module5Practice
   ```
 - **Chạy Spring Boot server (test Swagger `/swagger-ui.html` & H2 `/h2-console`):**
   ```bash
@@ -132,4 +134,4 @@ Cài nhanh các extension ID sau trên máy mới để có auto-import, báo l�
 ## 6. Câu nhắn mở đầu buổi sau trên máy bất kỳ
 1. `git pull` để lấy code mới nhất.
 2. Mở Antigravity chat mới và nhắn:
-   `"Đọc LEARNING_PROGRESS.md, mình tiếp tục học Module 4 đang dở nhé"`
+   `"Đọc LEARNING_PROGRESS.md, mình tiếp tục học Module 5 rút gọn (hoặc Spring Boot) đang dở nhé"`
