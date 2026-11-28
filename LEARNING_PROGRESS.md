@@ -31,19 +31,18 @@
 
 ### C. Phân hệ Thực đơn `menu/` (Giai đoạn 1 — đang đi từng nấc)
 - **Entity & Enum:** [MenuItemStatus.java](src/main/java/com/learning/backend/menu/entity/MenuItemStatus.java), [Category.java](src/main/java/com/learning/backend/menu/entity/Category.java), [MenuItem.java](src/main/java/com/learning/backend/menu/entity/MenuItem.java) (đã nắm Khóa chính vs Khóa ngoại `@ManyToOne(fetch = FetchType.LAZY)`, `@Enumerated(EnumType.STRING)`, `@Index`, `@PrePersist`/`@PreUpdate`, `protected`, `camelCase` vs `snake_case`).
-- **Repository:** [CategoryRepository.java](src/main/java/com/learning/backend/menu/repository/CategoryRepository.java), [MenuItemRepository.java](src/main/java/com/learning/backend/menu/repository/MenuItemRepository.java) (`existsByCodeIgnoreCaseAndDeletedFalse`, `findByIdAndDeletedFalse`).
+- **Repository:** [CategoryRepository.java](src/main/java/com/learning/backend/menu/repository/CategoryRepository.java), [MenuItemRepository.java](src/main/java/com/learning/backend/menu/repository/MenuItemRepository.java) (`existsByCodeIgnoreCaseAndDeletedFalse`, `findByIdAndDeletedFalse`, `findByCategoryIdAndDeletedFalse`).
 - **DTO & MapStruct Mapper:** [CategoryResponse.java](src/main/java/com/learning/backend/menu/dto/CategoryResponse.java), [MenuItemRequest.java](src/main/java/com/learning/backend/menu/dto/MenuItemRequest.java), [MenuItemResponse.java](src/main/java/com/learning/backend/menu/dto/MenuItemResponse.java), [MenuItemMapper.java](src/main/java/com/learning/backend/menu/mapper/MenuItemMapper.java) (đã hiểu DTO là hộp đóng gói/soát lỗi ở Controller, `@Mapping(source = "category.name", target = "categoryName")`, `defaultValue = "AVAILABLE"`).
-- **Service:** [MenuService.java](src/main/java/com/learning/backend/menu/service/MenuService.java), [MenuServiceImpl.java](src/main/java/com/learning/backend/menu/service/impl/MenuServiceImpl.java) — đã tự hoàn thiện `getCategories()`, `getAllMenuItems()`, `getMenuItemDetail(id)` (đã hiểu DI `@RequiredArgsConstructor`, `Class::method` vs `bien::method`, quy tắc không `()` khi dùng `::`).
-- **Controller:** [MenuController.java](src/main/java/com/learning/backend/menu/controller/MenuController.java) — đã xong **Nấc 1** (`GET /api/menu/categories`, `GET /api/menu`) và vừa viết xong code **Nấc 2** (`GET /api/menu/{id}` với `@PathVariable Long id`, build `./mvnw -o clean test` **PASS 100%** — chưa chạy thử trên Swagger UI ở máy công ty).
+- **Service:** [MenuService.java](src/main/java/com/learning/backend/menu/service/MenuService.java), [MenuServiceImpl.java](src/main/java/com/learning/backend/menu/service/impl/MenuServiceImpl.java) — đã tự hoàn thiện `getCategories()`, `getAllMenuItems()`, `getMenuItemDetail(id)`, `getMenuItemsByCategory(categoryId)` (đã hiểu DI `@RequiredArgsConstructor`, `Class::method` vs `bien::method`, quy tắc không `()` khi dùng `::`, và Tính trừu tượng `Service` interface vs `ServiceImpl`).
+- **Controller:** [MenuController.java](src/main/java/com/learning/backend/menu/controller/MenuController.java) — đã tự hoàn thiện cả **Nấc 1** (`GET /api/menu/categories`, `GET /api/menu`), **Nấc 2** (`GET /api/menu/{id}` với `@PathVariable`), và **Nấc 2.2** (`GET /api/menu/by-category?categoryId=...` với `@RequestParam`), `./mvnw -o clean compile -q` **PASS 100%**!
 
 ---
 
 ## 3. ĐÚNG ĐIỂM DỪNG & BƯỚC TIẾP THEO KHI NHẮN `"tiếp tục học"` / `"bài tiếp theo"`
-1. **Kiểm chứng nhanh Nấc 2 (2 phút):** Bật app (`./mvnw -o spring-boot:run`), mở Swagger UI (`/swagger-ui.html`) test `GET /api/menu` và `GET /api/menu/{id}` (`id = 3` $\rightarrow$ 200, `id = 999` $\rightarrow$ 404), và **soi câu SQL Hibernate in ra Terminal** (tiện chỉ luôn nếu thấy N+1 Query `select category` lặp lại!).
-2. **Nấc 2.2 (`@RequestParam` — Cháo đặc hơn chút):** Thêm 1 API lọc món đơn giản theo `categoryId` (`GET /api/menu/by-category?categoryId=2` hoặc thêm `@RequestParam(required = false) Long categoryId`) — Show & Mổ xẻ ví dụ trong chat trước $\rightarrow$ bạn tự code vào Service/Controller sau.
-3. **Nấc 3 (Cơm): `POST /api/menu`** (`@PostMapping`, `@Valid`, `@RequestBody`, `@Transactional` + `existsByCode` báo 409 CONFLICT) $\rightarrow$ test tạo món mới trên Swagger & kiểm tra `SELECT` trên `/h2-console`.
-4. **Nấc 4 (Phở): Phân trang** (`Pageable` + `PageResponse`).
-5. **Nấc 5 (Hải sản mỹ vị): `Specification` lọc động nhiều tiêu chí** + sang `table/` (`DiningTable` QR).
+1. **Kiểm chứng nhanh Nấc 1–2.2 trên Swagger UI (2 phút):** Bật app (`./mvnw -o spring-boot:run`), test `GET /api/menu`, `GET /api/menu/3` (200), `GET /api/menu/999` (404), và `GET /api/menu/by-category?categoryId=2` (3 món chính) — đồng thời **soi log SQL Hibernate** (bắt thử N+1 Query `select category`).
+2. **Nấc 3 (Cơm): `POST /api/menu` — Tạo món mới** (`@PostMapping`, `@ResponseStatus(HttpStatus.CREATED)`, `@Valid`, `@RequestBody`, `@Transactional`, check trùng `code`, tìm `Category` $\rightarrow$ `save()`) — **Show & Mổ xẻ ví dụ trong chat trước $\rightarrow$ người học tự code TODO sau**, rồi xem dòng mới trong H2 Console!
+3. **Nấc 4 (Phở): Phân trang** (`Pageable` + `PageResponse`).
+4. **Nấc 5 (Hải sản mỹ vị): `Specification` lọc động nhiều tiêu chí** + sang `table/` (`DiningTable` QR bàn ăn).
 
 ---
 
@@ -51,7 +50,7 @@
 
 | GĐ | Phạm vi & App sử dụng | API cốt lõi | Kỹ thuật Spring Boot & SQL | Trạng thái |
 | :---: | :--- | :--- | :--- | :---: |
-| **1** | **Thực đơn & Bàn (`menu/`, `table/`)** — *App Khách* | `GET /api/menu`, `GET /api/menu/{id}`, lọc `@RequestParam`, `POST /api/menu`, `Pageable`, `Specification`, `GET /api/tables` | `@Entity`, `@ManyToOne`, MapStruct, `@PathVariable`/`@RequestParam`/`@RequestBody`, `PageResponse`, `Specification`, `@Index` | **▶️ ĐANG HỌC (Xong Nấc 2, chuẩn bị test Swagger & sang `@RequestParam`)** |
+| **1** | **Thực đơn & Bàn (`menu/`, `table/`)** — *App Khách* | `GET /api/menu`, `GET /api/menu/{id}`, `GET /api/menu/by-category`, `POST /api/menu`, `Pageable`, `Specification`, `GET /api/tables` | `@Entity`, `@ManyToOne`, MapStruct, `@PathVariable`/`@RequestParam`/`@RequestBody`, `PageResponse`, `Specification`, `@Index` | **▶️ ĐANG HỌC (Xong code Nấc 1–2.2, tiếp theo: test Swagger + sang Nấc 3 `POST /api/menu`)** |
 | **2** | **Đặt món tại bàn (`order/`)** — *App Khách* | `POST /api/orders`, `POST /api/orders/{id}/items`, `GET /api/orders/{id}` | Quan hệ 1-N (`Order`–`OrderItem`), `@Transactional`, Snapshot giá, `JOIN FETCH` | ⬜ Chưa học |
 | **3** | **Bếp & Thu ngân (`kitchen/`, `payment/`)** | `PATCH /api/kitchen/items/{id}/status`, Checkout VAT + Voucher | Enum State Machine, Lock chống thanh toán trùng, SSE / WebSocket | ⬜ Chưa học |
 | **4** | **Auth & DB thật (`auth/`)** | Login JWT + RBAC, chuyển H2 $\rightarrow$ PostgreSQL + DBeaver | Spring Security + JWT, Docker/Postgres, Flyway `.sql` | ⬜ Chưa học |

@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -77,6 +78,27 @@ public class MenuController {
     @GetMapping("/{id}")
     public ApiResponse<MenuItemResponse> getMenuItemDetail(@PathVariable Long id) {
         return ApiResponse.ok(menuService.getMenuItemDetail(id));
+    }
+
+    /**
+     * BÀI TẬP NẤC 2.2 (Phần 3/3 — Controller nhận @RequestParam):
+     * - Ngữ cảnh App Mobile: App gọi `GET /api/menu/by-category?categoryId=2`.
+     * - Yêu cầu cụ thể:
+     * 1. Gắn `@Operation(summary = "Lọc món ăn theo danh mục")`
+     * 2. Gắn `@GetMapping("/by-category")`
+     * 3. Hứng tham số `@RequestParam Long categoryId`
+     * 4. Trả về `ApiResponse.ok(menuService.getMenuItemsByCategory(categoryId))`
+     * - Ví dụ URL: `GET /api/menu/by-category?categoryId=2` -> JSON `{ "success":
+     * true, "data": [ ... 3 món chính ... ] }`
+     * - Công cụ: `@GetMapping("/by-category")`, `@RequestParam Long categoryId`,
+     * `ApiResponse.ok(...)`.
+     */
+    // TODO: Viết API GET /api/menu/by-category tại đây
+
+    @Operation(summary = "Lọc món ăn theo danh mục")
+    @GetMapping("/by-category")
+    public ApiResponse<List<MenuItemResponse>> getMenuByCategory(@RequestParam Long categoryId) {
+        return ApiResponse.ok(menuService.getMenuItemsByCategory(categoryId));
     }
 
 }

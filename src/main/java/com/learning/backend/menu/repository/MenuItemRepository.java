@@ -2,6 +2,7 @@ package com.learning.backend.menu.repository;
 
 import com.learning.backend.menu.entity.MenuItem;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -33,4 +34,19 @@ public interface MenuItemRepository
     // id)`
     // (Nhớ import java.util.Optional;)
     Optional<MenuItem> findByIdAndDeletedFalse(Long id);
+
+    /**
+     * BÀI TẬP NẤC 2.2 (Phần 1/3 — Derived Query lọc theo Khóa ngoại Category):
+     * - Ngữ cảnh App Mobile: Khách bấm tab "Món chính" (id = 2) trên thanh danh
+     * mục.
+     * - Yêu cầu cụ thể: Khai báo hàm tìm tất cả `MenuItem` có `category.id` khớp
+     * `categoryId` và `deleted = false`.
+     * - Ví dụ luồng SQL: Gọi hàm với `2L` -> SQL `SELECT * FROM menu_items WHERE
+     * category_id = 2 AND deleted = false`.
+     * - Công cụ / Cú pháp: `List<MenuItem> findByCategoryIdAndDeletedFalse(Long
+     * categoryId);`
+     */
+    // TODO: Viết chữ ký hàm `findByCategoryIdAndDeletedFalse` tại đây
+    List<MenuItem> findByCategoryIdAndDeletedFalse(Long categoryId);
+
 }

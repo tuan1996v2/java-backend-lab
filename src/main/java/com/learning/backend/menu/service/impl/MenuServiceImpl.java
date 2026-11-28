@@ -67,4 +67,27 @@ public class MenuServiceImpl implements MenuService {
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy món ăn với id: " + id));
         return menuItemMapper.toResponse(item);
     }
+
+    /**
+     * BÀI TẬP NẤC 2.2 (Phần 2/3 — Service lọc món theo danh mục):
+     * - Ngữ cảnh App Mobile: Trả danh sách món thuộc 1 danh mục khi khách bấm tab
+     * lọc.
+     * - Yêu cầu cụ thể:
+     * 1. Gọi `menuItemRepository.findByCategoryIdAndDeletedFalse(categoryId)`
+     * 2. Chuyển sang `List<MenuItemResponse>` bằng
+     * `.stream().map(menuItemMapper::toResponse).toList()` và trả về.
+     * - Ví dụ luồng dữ liệu: `categoryId = 2L` -> trả 3 món ("Phở Bò", "Cơm Chiên",
+     * "Bò Lúc Lắc").
+     * - Công cụ: `menuItemRepository.findByCategoryIdAndDeletedFalse(categoryId)` +
+     * `.stream().map(menuItemMapper::toResponse).toList()`.
+     */
+    @Override
+    public List<MenuItemResponse> getMenuItemsByCategory(Long categoryId) {
+        // TODO: Gọi repository và map sang MenuItemResponse
+        if (categoryId == null) {
+            return List.of();
+        }
+        List<MenuItem> list = menuItemRepository.findByCategoryIdAndDeletedFalse(categoryId);
+        return list.stream().map(menuItemMapper::toResponse).toList();
+    }
 }

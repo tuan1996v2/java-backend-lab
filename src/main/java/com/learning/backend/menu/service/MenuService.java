@@ -15,4 +15,6 @@ public interface MenuService {
     List<MenuItemResponse> getAllMenuItems();
 
     MenuItemResponse getMenuItemDetail(Long id);
+
+    List<MenuItemResponse> getMenuItemsByCategory(Long categoryId);
 }
