@@ -1,11 +1,13 @@
 package com.learning.javacore.module5;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 /**
@@ -236,7 +238,6 @@ public class Module5Practice {
             return BigDecimal.ZERO;
         }
         BigDecimal price = productOpt.map(ProductItem::price).orElse(BigDecimal.ZERO);
-        // TODO (Bài 2): Kiểm tra productOpt == null, sau đó dùng .map(...).orElse(...)
         return price;
     }
 
@@ -262,9 +263,16 @@ public class Module5Practice {
      * IllegalArgumentException(...)`, `throw new InsufficientStockException(...)`
      */
     public static int bai3_kiemTraVaTruKho(ProductItem product, int buyQty) {
-        // TODO (Bài 3): Kiểm tra 3 điều kiện và ném đúng Exception hoặc trả stock còn
-        // lại
-        return -1;
+        if (product == null) {
+            throw new NotFoundException("Sản phẩm không tồn tại");
+        }
+        if (buyQty <= 0) {
+            throw new IllegalArgumentException("Số lượng mua phải > 0");
+        }
+        if (product.stock() < buyQty || buyQty >= 99) {
+            throw new InsufficientStockException("Không đủ tồn kho");
+        }
+        return product.stock() - buyQty;
     }
 
     /**
@@ -292,8 +300,23 @@ public class Module5Practice {
      * `products.stream().filter(...).map(ProductItem::name).toList()`
      */
     public static List<String> bai4_layTenSanPhamConHangTheoDanhMuc(List<ProductItem> products, String category) {
-        // TODO (Bài 4): Dùng stream().filter(...).map(...).toList()
-        return List.of();
+        if (products == null || category == null) {
+            return List.of();
+        }
+        String clearCategory = category.trim().toUpperCase(Locale.ROOT);
+        if (clearCategory.isEmpty()) {
+
+            return List.of();
+        }
+        // for (ProductItem product : products) {
+        // if (product == null || product.category == null || product.stock() > 0
+        // || product.category.equalsIgnoreCase(clearCategory)) {
+        // continue;
+        // }
+        // products.stream().filter(product.category.equalsIgnoreCase(clearCategory)).map(ProductItem::name).toList();
+        // }
+        return products.stream().filter(p -> p != null && p.category() != null && p.stock() > 0
+                && p.category().trim().equalsIgnoreCase(clearCategory)).map(ProductItem::name).toList();
     }
 
     /**
@@ -314,8 +337,13 @@ public class Module5Practice {
      * `products.stream().filter(...).sorted(Comparator.comparing(ProductItem::price)).limit(limit).toList()`
      */
     public static List<ProductItem> bai5_topSanPhamReNhatConHang(List<ProductItem> products, int limit) {
+        if (products == null || limit <= 0) {
+
+            return List.of();
+        }
+        return products.stream().filter(p -> p != null && p.stock() > 0 && p.price() != null)
+                .sorted(Comparator.comparing(ProductItem::price)).limit(limit).toList();
         // TODO (Bài 5): Dùng stream().filter(...).sorted(...).limit(limit).toList()
-        return List.of();
     }
 
     /**
@@ -344,9 +372,15 @@ public class Module5Practice {
      * p.category().trim()))`
      */
     public static Map<String, List<ProductItem>> bai6_gomNhomTheoDanhMuc(List<ProductItem> products) {
+        if (products == null) {
+
+            return Map.of();
+        }
+
+        return products.stream().filter(p -> p != null && p.category() != null && !p.category().isBlank())
+                .collect(Collectors.groupingBy(p -> p.category().trim()));
         // TODO (Bài 6 🪨): Lọc p != null và category khác null/blank, rồi
         // Collectors.groupingBy(p -> p.category().trim())
-        return Map.of();
     }
 
     private static void check(String tenBai, boolean passed) {
